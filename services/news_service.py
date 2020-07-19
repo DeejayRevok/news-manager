@@ -5,6 +5,7 @@ from typing import Iterator, Tuple
 
 from news_service_lib.models import New
 
+from infrastructure.storage.filters.sort_direction import SortDirection
 from infrastructure.storage.filters.storage_filter_type import StorageFilterType
 from infrastructure.storage.mongo_storage import MongoStorage
 from infrastructure.storage.storage import Storage
@@ -100,7 +101,8 @@ class NewsService:
             filter_types.append(date_filter_types)
             filters_params.append(date_filter_params)
 
-        return NewsService._render_news_list(self._client.get(filter_types, filters_params))
+        return NewsService._render_news_list(self._client.get(filter_types=filter_types, filters_params=filters_params,
+                                                              sort_key="date", sort_direction=SortDirection.DESC))
 
     @staticmethod
     async def _build_source_filter(source: str) -> Tuple[StorageFilterType, FixedDict]:
