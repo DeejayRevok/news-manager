@@ -190,6 +190,26 @@ def error_formatter(error: Exception) -> dict:
     return dict(error=error.__class__.__name__, detail=str(error))
 
 
+def graph_attach_mod(app, *, route_path='/graphql', route_name='graphql', **kwargs):
+    """
+    Attach the Graphql view to the input aiohttp app avoiding cors problems
+
+    Args:
+        app: app to attach the GraphQL view
+        route_path: URI path to the GraphQL view
+        route_name: name of the route for the GraphQL view
+        **kwargs: GraphQL view initialization arguments
+
+    """
+    view = GraphQLView(**kwargs)
+    for method in 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD':
+        app.router.add_route(method, route_path, view, name=route_name)
+
+    if 'graphiql' in kwargs and kwargs['graphiql']:
+        for method in 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD':
+            app.router.add_route(method, '/graphiql', view, name='graphiql')
+
+
 def setup_routes(app: Application):
     """
     Add the graphql routes to the specified application
@@ -198,11 +218,11 @@ def setup_routes(app: Application):
         app: application to add routes
 
     """
-    GraphQLView.attach(app,
-                       schema=schema,
-                       graphiql=True,
-                       graphiql_template=GRAPHIQL_JWT_TEMPLATE,
-                       route_path='/graphql',
-                       executor=AsyncioExecutor(loop=asyncio.get_event_loop()),
-                       enable_async=True,
-                       error_formatter=error_formatter)
+    graph_attach_mod(app,
+                     route_path='/graphql',
+                     schema=schema,
+                     graphiql=True,
+                     graphiql_template=GRAPHIQL_JWT_TEMPLATE,
+                     executor=AsyncioExecutor(loop=asyncio.get_event_loop()),
+                     enable_async=True,
+                     error_formatter=error_formatter)

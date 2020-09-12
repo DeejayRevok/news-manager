@@ -2,6 +2,7 @@ import asyncio
 import unittest
 from unittest.mock import patch
 
+from infrastructure.storage.filters.sort_direction import SortDirection
 from infrastructure.storage.filters.storage_filter_type import StorageFilterType
 from news_service_lib.models.new import New
 from lib.fixed_dict import FixedDict
@@ -55,20 +56,26 @@ class TestNewsService(unittest.TestCase):
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.get_news_filtered(from_date=start, to_date=end))
 
-        client.get.assert_called_with([StorageFilterType.RANGE],
-                                      [FixedDict(dict(key='date', upper=end, lower=start))])
+        client.get.assert_called_with(filter_types=[StorageFilterType.RANGE],
+                                      filters_params=[FixedDict(dict(key='date', upper=end, lower=start))],
+                                      sort_key="date",
+                                      sort_direction=SortDirection.DESC)
 
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.get_news_filtered(from_date=start))
 
-        client.get.assert_called_with([StorageFilterType.RANGE],
-                                      [FixedDict(dict(key='date', upper=None, lower=start))])
+        client.get.assert_called_with(filter_types=[StorageFilterType.RANGE],
+                                      filters_params=[FixedDict(dict(key='date', upper=None, lower=start))],
+                                      sort_key="date",
+                                      sort_direction=SortDirection.DESC)
 
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.get_news_filtered(to_date=end))
 
-        client.get.assert_called_with([StorageFilterType.RANGE],
-                                      [FixedDict(dict(key='date', upper=end, lower=None))])
+        client.get.assert_called_with(filter_types=[StorageFilterType.RANGE],
+                                      filters_params=[FixedDict(dict(key='date', upper=end, lower=None))],
+                                      sort_key="date",
+                                      sort_direction=SortDirection.DESC)
 
     def test_render_news(self):
         """

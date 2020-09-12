@@ -2,8 +2,9 @@
 Abstract storage module
 """
 from abc import ABCMeta, abstractmethod
-from typing import Iterator, List, Callable
+from typing import Iterator, List, Callable, Optional
 
+from infrastructure.storage.filters.sort_direction import SortDirection
 from infrastructure.storage.filters.storage_filter_type import StorageFilterType
 from lib.fixed_dict import FixedDict
 
@@ -35,13 +36,16 @@ class Storage(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get(self, filter_types: List[StorageFilterType] = None, filters_params: List[FixedDict] = None) -> Iterator[dict]:
+    def get(self, filter_types: List[StorageFilterType] = None, filters_params: List[FixedDict] = None,
+            sort_key: Optional[str] = None, sort_direction: Optional[SortDirection] = None) -> Iterator[dict]:
         """
         Get items from the storage. If filters are provided filter results.
 
         Args:
             filter_types: type of the filters to apply
             filters_params: filters params
+            sort_key: key to sort the results
+            sort_direction: direction of the result sorting
 
         Returns: iterator to dictionary representation of the items
 

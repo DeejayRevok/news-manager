@@ -2,12 +2,13 @@
 MongoDB storage implementation module
 """
 import functools
-from typing import Callable, Any, Iterator, List
+from typing import Callable, Any, Iterator, List, Optional
 
 import pymongo
 from pymongo.errors import ServerSelectionTimeoutError
 
 from infrastructure.storage.filters.mongo_filter import MongoFilter
+from infrastructure.storage.filters.sort_direction import SortDirection
 from infrastructure.storage.filters.storage_filter_type import StorageFilterType
 from infrastructure.storage.storage import Storage
 from lib.fixed_dict import FixedDict
@@ -131,14 +132,16 @@ class MongoStorage(Storage):
         self.collection.insert_one(item)
 
     @check_collection
-    def get(self, filter_types: List[StorageFilterType] = None, filters_params: List[FixedDict] = None) \
-            -> Iterator[dict]:
+    def get(self, filter_types: List[StorageFilterType] = None, filters_params: List[FixedDict] = None,
+            sort_key: Optional[str] = None, sort_direction: Optional[SortDirection] = None) -> Iterator[dict]:
         """
         Get items which match the specified filters
 
         Args:
             filter_types: types of the filters to apply
             filters_params: filters parameters
+            sort_key: key to sort the results
+            sort_direction: direction of the result sorting
 
         Returns: iterator to the matching items
 
@@ -152,6 +155,9 @@ class MongoStorage(Storage):
             cursor = self.collection.find(aggregated_query)
         else:
             cursor = self.collection.find()
+
+        if sort_key:
+            cursor = cursor.sort(sort_key, sort_direction.value[0])
 
         for item in cursor:
             yield MongoStorage.render_item(item)
