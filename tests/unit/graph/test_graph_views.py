@@ -26,14 +26,13 @@ class TestGraphViews(TestCase):
         """
         test_app = Application()
         setup_routes(test_app)
-        graph_view_mock.attach.assert_called_with(test_app,
-                                                  schema=schema,
-                                                  graphiql=True,
-                                                  graphiql_template=GRAPHIQL_JWT_TEMPLATE,
-                                                  route_path='/graphql',
-                                                  executor=executor_mock(loop=asyncio.get_event_loop()),
-                                                  enable_async=True,
-                                                  error_formatter=error_formatter)
+        graph_view_mock.assert_called_with(schema=schema,
+                                           graphiql=True,
+                                           graphiql_template=GRAPHIQL_JWT_TEMPLATE,
+                                           executor=executor_mock(loop=asyncio.get_event_loop()),
+                                           enable_async=True,
+                                           error_formatter=error_formatter)
+        self.assertGreater(len([route for route in test_app.router.routes() if route.name == 'graphql']), 0)
 
     def test_error_formatter(self):
         """

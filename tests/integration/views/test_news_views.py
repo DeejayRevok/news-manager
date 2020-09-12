@@ -40,7 +40,9 @@ async def mock_auth_middleware(_, handler):
 
 
 class TestNewsView(AioHTTPTestCase):
-
+    """
+    News views test cases implementation
+    """
     @patch.object(NewsService, 'get_news_filtered')
     @patch('elasticapm.middleware.ElasticAPM')
     async def get_application(self, mocked_news_service, mock_apm_client):
