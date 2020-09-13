@@ -14,4 +14,4 @@ RUN pip install -r news_manager/requirements.txt
 COPY ./tools_config/metricbeat.yml /etc/metricbeat/metricbeat.yml
 
 EXPOSE 8080
-CMD service metricbeat start && export PYTHONPATH=${PYTHONPATH}:/app && python ./news_manager/webapp/main.py -p DOCKER
+CMD service metricbeat start && export PYTHONPATH=${PYTHONPATH}:/app/news_manager && python ./news_manager/webapp/main.py -p DOCKER
