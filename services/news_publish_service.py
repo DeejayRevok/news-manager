@@ -16,6 +16,7 @@ class NewsPublishService:
     """
     News publish service implementation
     """
+
     def __init__(self, app: Application):
         """
         Start a new process which listens the new inserts and publish them in the exchange configured
@@ -25,7 +26,8 @@ class NewsPublishService:
         """
         self._app = app
         self._news_service = app['news_service']
-        self._exchange_publisher = ExchangePublisher(**app['config'].get_section('RABBIT'), exchange='news')
+        self._exchange_publisher = ExchangePublisher(**app['config'].get_section('RABBIT'), exchange='news',
+                                                     logger=LOGGER)
 
         if not self._exchange_publisher.test_connection():
             LOGGER.error('Error connecting to the queue provider. Exiting...')
