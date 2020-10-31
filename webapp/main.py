@@ -5,9 +5,9 @@ from aiohttp.web_app import Application
 from aiohttp_apispec import validation_middleware
 from news_service_lib import HealthCheck, server_runner, get_uaa_service, uaa_auth_middleware, initialize_apm, \
     NlpServiceService
+from news_service_lib.storage import storage_factory
 
 from cron.cron_factory import initialize_crons
-from infrastructure.storage.storage_factory import storage_factory
 from log_config import get_logger, LOG_CONFIG
 from services.news_consume_service import NewsConsumeService
 from services.news_publish_service import NewsPublishService
@@ -41,8 +41,10 @@ def init_news_manager(app: Application) -> Application:
 
     storage_config = app['config'].get_section(app['config'].get('server', 'storage'))
 
-    news_store_client = storage_factory(app['config'].get('server', 'storage'), storage_config)
-    app['news_service'] = NewsService(news_store_client)
+    storage_client = storage_factory(app['config'].get('server', 'storage'), storage_config, get_logger())
+    app['storage_client'] = storage_client
+
+    app['news_service'] = NewsService(storage_client)
 
     uaa_config = app['config'].get_section('UAA')
     app['uaa_service'] = get_uaa_service(uaa_config)

@@ -5,8 +5,6 @@ import unittest
 from unittest.mock import patch, Mock
 
 from cron.cron_factory import initialize_crons
-from infrastructure.storage.mongo_storage import MongoStorage
-from infrastructure.storage.storage_factory import storage_factory
 
 
 class DummyImplementation:
@@ -23,19 +21,6 @@ class TestFactories(unittest.TestCase):
     """
     Factories test cases
     """
-    def test_storage_factory_unknown(self):
-        """
-        Test storage factory raises error for unknown type
-        """
-        with self.assertRaises(NotImplementedError):
-            storage_factory('UNKNOWN', {})
-
-    def test_storage_factory_mongo(self):
-        """
-        Test storage factory with Mongo type creates Mongo client
-        """
-        storage = storage_factory('MONGO', {'members': '0.0.0.0:1234', 'rsname': 'test', 'database': 'test'})
-        self.assertTrue(isinstance(storage, MongoStorage))
 
     @patch('cron.cron_factory.DEFINITIONS')
     def test_initialize_crons(self, mocked_definitions):

@@ -2,7 +2,7 @@
 News publish service tests module
 """
 from unittest import TestCase
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, call, ANY
 
 from aiohttp.web_app import Application
 from aiounittest import async_test
@@ -44,7 +44,7 @@ class TestNewsPublishService(TestCase):
         """
         Test initializing publish service creates the exchange publisher in a separate process and runs the process
         """
-        self.publisher_mock.assert_called_with(**self.TEST_RABBIT_CONFIG, exchange='news')
+        self.publisher_mock.assert_called_with(**self.TEST_RABBIT_CONFIG, exchange='news', logger=ANY)
         self.process_mock.assert_called_with(target=self.news_publish_service.__call__)
         self.assertTrue(self.process_mock().start.called)
 

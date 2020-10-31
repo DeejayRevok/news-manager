@@ -1,15 +1,15 @@
 """
 News service module
 """
-from typing import Iterator, Tuple
+from typing import Iterator, Tuple, Union
 
 from news_service_lib.models import New
-
-from infrastructure.storage.filters.sort_direction import SortDirection
-from infrastructure.storage.filters.storage_filter_type import StorageFilterType
-from infrastructure.storage.mongo_storage import MongoStorage
-from infrastructure.storage.storage import Storage
-from lib.fixed_dict import FixedDict
+from news_service_lib.storage.implementation import MongoStorage
+from news_service_lib.storage.filter import MatchFilter
+from news_service_lib.storage.filter import RangeFilter
+from news_service_lib.storage import SortDirection
+from news_service_lib.storage.implementation import Storage
+from news_service_lib.storage import StorageWatcher
 
 
 class NewsService:
@@ -17,7 +17,7 @@ class NewsService:
     Class used to manage the interaction with the news
     """
 
-    def __init__(self, client: Storage):
+    def __init__(self, client: Union[Storage, StorageWatcher]):
         """
         Initialize the NEWS service with the specified storage client
 
@@ -25,6 +25,7 @@ class NewsService:
             client: storage client
         """
         self._client = client
+        self._watcher = client
         if isinstance(self._client, MongoStorage):
             self._client.set_collection('new')
 
@@ -36,10 +37,8 @@ class NewsService:
             new: new to persist
 
         """
-        exist_filter_params = StorageFilterType.UNIQUE.params
-        exist_filter_params['key'] = 'title'
-        exist_filter_params['value'] = new.title
-        self._client.save(dict(new), exist_filter=StorageFilterType.UNIQUE, exist_params=exist_filter_params)
+        await self.delete_new(new)
+        self._client.save(dict(new))
 
     async def get_new_by_title(self, title: str) -> New:
         """
@@ -51,12 +50,7 @@ class NewsService:
         Returns: found new with the specified title
 
         """
-        unique_filter_params = StorageFilterType.UNIQUE.params
-        unique_filter_params['key'] = 'title'
-        unique_filter_params['value'] = title
-
-        found_new = next(self._client.get(filter_types=[StorageFilterType.UNIQUE],
-                                          filters_params=[unique_filter_params]), None)
+        found_new = next(self._client.get_one(filters=[MatchFilter('title', title)]), None)
 
         if found_new is not None:
             return NewsService._render_new(found_new)
@@ -78,114 +72,30 @@ class NewsService:
 
         Returns: filtered news
         """
-        filter_types = list()
-        filters_params = list()
+        filters_list = list()
 
         if source is not None:
-            source_filter_types, source_filter_params = await self._build_source_filter(source)
-            filter_types.append(source_filter_types)
-            filters_params.append(source_filter_params)
+            filters_list.append(MatchFilter('source', source))
 
         if hydration is not None:
-            hydration_filter_types, hydration_filter_params = await self._build_hydration_filter(hydration)
-            filter_types.append(hydration_filter_types)
-            filters_params.append(hydration_filter_params)
+            filters_list.append(MatchFilter('hydrated', hydration))
 
         if sentiment is not None and sentiment[0] is not None:
-            sentiment_filter_types, sentiment_filter_params = await self._build_sentiment_filter(*sentiment)
-            filter_types.append(sentiment_filter_types)
-            filters_params.append(sentiment_filter_params)
-
-        if from_date is not None or to_date is not None:
-            date_filter_types, date_filter_params = await self._build_date_filter(from_date, to_date)
-            filter_types.append(date_filter_types)
-            filters_params.append(date_filter_params)
-
-        return NewsService._render_news_list(self._client.get(filter_types=filter_types, filters_params=filters_params,
-                                                              sort_key="date", sort_direction=SortDirection.DESC))
-
-    @staticmethod
-    async def _build_source_filter(source: str) -> Tuple[StorageFilterType, FixedDict]:
-        """
-        Build source field filter with the specified source
-
-        Args:
-            source: source to filter with
-
-        Returns: source filter components
-
-        """
-        unique_filter_params = None
-        if source is not None:
-            unique_filter_params = StorageFilterType.UNIQUE.params
-            unique_filter_params['key'] = 'source'
-            unique_filter_params['value'] = source
-
-        return StorageFilterType.UNIQUE, unique_filter_params
-
-    @staticmethod
-    async def _build_hydration_filter(hydration: bool) -> Tuple[StorageFilterType, FixedDict]:
-        """
-        Build hydration field filter with the specified source
-
-        Args:
-            hydration: source to filter with
-
-        Returns: hydration filter components
-
-        """
-        unique_filter_params = None
-        if hydration is not None:
-            unique_filter_params = StorageFilterType.UNIQUE.params
-            unique_filter_params['key'] = 'hydrated'
-            unique_filter_params['value'] = hydration
-
-        return StorageFilterType.UNIQUE, unique_filter_params
-
-    @staticmethod
-    async def _build_sentiment_filter(sentiment: float, higher: bool) -> Tuple[StorageFilterType, FixedDict]:
-        """
-        Build sentiment field filter with the specified source
-
-        Args:
-            sentiment: sentiment to filter with
-            higher: True if greater values desired, False otherwise
-
-        Returns: sentiment filter components
-
-        """
-        range_filter_params = None
-        if sentiment is not None:
-            range_filter_params = StorageFilterType.RANGE.params
-            range_filter_params['key'] = 'sentiment'
-
-            if higher:
-                range_filter_params['lower'] = sentiment
+            if sentiment[1]:
+                filters_list.append(RangeFilter('sentiment', lower=sentiment[0]))
             else:
-                range_filter_params['upper'] = sentiment
+                filters_list.append(RangeFilter('sentiment', upper=sentiment[0]))
 
-        return StorageFilterType.RANGE, range_filter_params
-
-    @staticmethod
-    async def _build_date_filter(from_date: float, to_date: float) -> Tuple[StorageFilterType, FixedDict]:
-        """
-        Build date field filter with the specified source
-
-        Args:
-            from_date: start date to filter with
-            to_date: end date to filter with
-
-        Returns: date filter components
-
-        """
-        range_filter_params = None
         if from_date is not None or to_date is not None:
-            range_filter_params = StorageFilterType.RANGE.params
-            range_filter_params['key'] = 'date'
-            range_filter_params['upper'] = to_date
-            range_filter_params['lower'] = from_date
+            filters_list.append(RangeFilter('date', lower=from_date, upper=to_date))
 
-        return StorageFilterType.RANGE, range_filter_params
+        return NewsService._render_news_list(
+            self._client.get(filters_list, sort_key="date", sort_direction=SortDirection.DESC))
+
+    async def delete_new(self, new: New):
+        new_delete = self._client.get_one(filters=[MatchFilter('title', new.title)])
+        if new_delete:
+            self._client.delete(new_delete['_id'])
 
     def consume_new_inserts(self) -> Iterator[dict]:
         """
@@ -221,4 +131,6 @@ class NewsService:
         Returns: rendered new
 
         """
+        if '_id' in new:
+            del new['_id']
         return New(**new)

@@ -5,9 +5,9 @@ import sys
 from multiprocessing import Process
 
 from aiohttp.web_app import Application
+from news_service_lib.messaging.exchange_publisher import ExchangePublisher
 
 from log_config import get_logger
-from news_service_lib.messaging.exchange_publisher import ExchangePublisher
 
 LOGGER = get_logger()
 

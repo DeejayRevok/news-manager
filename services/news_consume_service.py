@@ -7,7 +7,6 @@ from multiprocessing import Process
 import json
 
 from aiohttp.web_app import Application
-
 from news_service_lib.messaging.exchange_consumer import ExchangeConsumer
 from news_service_lib.models import New, NamedEntity
 
