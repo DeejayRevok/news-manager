@@ -50,7 +50,7 @@ class NewsService:
         Returns: found new with the specified title
 
         """
-        found_new = next(self._client.get_one(filters=[MatchFilter('title', title)]), None)
+        found_new = self._client.get_one(filters=[MatchFilter('title', title)])
 
         if found_new is not None:
             return NewsService._render_new(found_new)
