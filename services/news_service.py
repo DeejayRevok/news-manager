@@ -97,14 +97,15 @@ class NewsService:
         if new_delete:
             self._client.delete(new_delete['_id'])
 
-    def consume_new_inserts(self) -> Iterator[dict]:
+    def consume_new_inserts(self) -> Iterator[New]:
         """
         Consume the new insertions
 
         Returns: an iterator to the inserted news
 
         """
-        yield from self._client.consume_inserts()
+        for document in self._client.consume_inserts():
+            yield self._render_new(document)
 
     @staticmethod
     def _render_news_list(news_list: Iterator[dict]) -> Iterator[New]:

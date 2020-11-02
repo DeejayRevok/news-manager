@@ -45,8 +45,8 @@ class NewsPublishService:
         self._exchange_publisher.initialize()
         try:
             for new_inserted in self._news_service.consume_new_inserts():
-                LOGGER.info('Listened inserted new %s', new_inserted['title'])
-                self._exchange_publisher(new_inserted)
+                LOGGER.info('Listened inserted new %s', new_inserted.title)
+                self._exchange_publisher(dict(new_inserted))
         except Exception as exc:
             LOGGER.error('Error while consuming from storage %s', str(exc))
         except KeyboardInterrupt:
