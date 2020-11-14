@@ -11,7 +11,6 @@ from aiohttp_apispec import docs
 from news_service_lib import ClassRouteTableDef, login_required
 
 from log_config import get_logger
-from news_service_lib.models import New
 from services.news_service import NewsService
 from webapp.definitions import API_VERSION
 

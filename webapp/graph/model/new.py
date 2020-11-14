@@ -5,15 +5,15 @@ from typing import List
 from graphene import ObjectType, String, Boolean, List as GraphList, Float
 from graphql import ResolveInfo
 
+from news_service_lib.graphql_utils import CustomDateTime
 from webapp.graph.model.entity import Entity
-from webapp.graph.utils.custom_date_time import CustomDateTime
 
 
 class New(ObjectType):
     """
     New graphql model implementation
     """
-    title = String(description="New title. unique for all the news")
+    title = String(description="New title unique for all the news")
     content = String(description="New full content")
     source = String(description="New source name")
     date = CustomDateTime(description="New publish date and time")
