@@ -8,8 +8,8 @@ from graphene import ObjectType, List as GraphList, Field, Argument, String, Boo
 from graphql import ResolveInfo
 
 from log_config import get_logger
-from news_service_lib.graphql_utils import login_required, CustomDateTime
-from webapp.graph.model.new import New
+from news_service_lib.graphql import login_required, CustomDateTime
+from news_service_lib.graphql.model import New
 
 LOGGER = get_logger()
 

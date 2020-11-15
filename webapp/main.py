@@ -5,7 +5,7 @@ from aiohttp.web_app import Application
 from aiohttp_apispec import validation_middleware
 from news_service_lib import HealthCheck, server_runner, get_uaa_service, uaa_auth_middleware, initialize_apm, \
     NlpServiceService
-from news_service_lib.graphql_utils import setup_graphql_routes
+from news_service_lib.graphql import setup_graphql_routes
 from news_service_lib.storage import storage_factory
 
 from cron.cron_factory import initialize_crons
