@@ -43,7 +43,7 @@ def init_news_manager(app: Application) -> Application:
     storage_config = app['config'].get_section(app['config'].get('server', 'storage'))
 
     storage_client = storage_factory(app['config'].get('server', 'storage'), storage_config, get_logger())
-    app['storage_client'] = storage_client
+    app['storage_client'] = storage_client._mongo_client
 
     app['news_service'] = NewsService(storage_client)
 
