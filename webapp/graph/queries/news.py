@@ -8,9 +8,8 @@ from graphene import ObjectType, List as GraphList, Field, Argument, String, Boo
 from graphql import ResolveInfo
 
 from log_config import get_logger
-from webapp.graph.model.new import New
-from webapp.graph.utils.auth import login_required
-from webapp.graph.utils.custom_date_time import DATE_FORMAT, CustomDateTime
+from news_service_lib.graphql import login_required, CustomDateTime
+from news_service_lib.graphql.model import New
 
 LOGGER = get_logger()
 
@@ -52,7 +51,7 @@ class NewsQuery(ObjectType):
         """
         LOGGER.info('Resolving multiple news')
         app = info.context['request'].app
-        return [new.dto(DATE_FORMAT) for new in
+        return [new.dto(CustomDateTime.DATE_FORMAT) for new in
                 await app['news_service'].get_news_filtered(source=source, hydration=hydration,
                                                             sentiment=(sentiment, higher),
                                                             from_date=from_date.timestamp() if from_date else None,

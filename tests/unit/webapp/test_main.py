@@ -2,7 +2,7 @@
 News manager main tests module
 """
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from aiohttp.web_app import Application
 from news_service_lib.config import Configuration
@@ -29,7 +29,8 @@ class TestMain(unittest.TestCase):
         """
         Test if the initialization of the app initializes all the required modules
         """
-        test_storage_client = dict(test='test')
+        test_storage_client = MagicMock()
+        test_storage_client._mongo_client = MagicMock()
         storage_factory_mock.return_value = test_storage_client
         config_mock.get_section.return_value = self.TEST_CONFIG
         config_mock.get.return_value = 'test'

@@ -5,15 +5,16 @@ from aiohttp.web_app import Application
 from aiohttp_apispec import validation_middleware
 from news_service_lib import HealthCheck, server_runner, get_uaa_service, uaa_auth_middleware, initialize_apm, \
     NlpServiceService
+from news_service_lib.graphql import setup_graphql_routes
+from news_service_lib.storage import storage_factory
 
 from cron.cron_factory import initialize_crons
-from infrastructure.storage.storage_factory import storage_factory
 from log_config import get_logger, LOG_CONFIG
 from services.news_consume_service import NewsConsumeService
 from services.news_publish_service import NewsPublishService
 from services.news_service import NewsService
 from webapp.definitions import CONFIG_PATH, health_check, API_VERSION
-from webapp.graph import graphql_views
+from webapp.graph import schema
 from webapp.middlewares import error_middleware
 from webapp.views import news_view
 
@@ -41,8 +42,10 @@ def init_news_manager(app: Application) -> Application:
 
     storage_config = app['config'].get_section(app['config'].get('server', 'storage'))
 
-    news_store_client = storage_factory(app['config'].get('server', 'storage'), storage_config)
-    app['news_service'] = NewsService(news_store_client)
+    storage_client = storage_factory(app['config'].get('server', 'storage'), storage_config, get_logger())
+    app['storage_client'] = storage_client._mongo_client
+
+    app['news_service'] = NewsService(storage_client)
 
     uaa_config = app['config'].get_section('UAA')
     app['uaa_service'] = get_uaa_service(uaa_config)
@@ -58,11 +61,13 @@ def init_news_manager(app: Application) -> Application:
     HealthCheck(app, health_check)
 
     news_view.setup_routes(app)
-    graphql_views.setup_routes(app)
+    setup_graphql_routes(app, schema, get_logger())
 
     app.middlewares.append(error_middleware)
     app.middlewares.append(uaa_auth_middleware)
     app.middlewares.append(validation_middleware)
+
+    app.on_shutdown.append(shutdown)
 
     initialize_crons(app)
 

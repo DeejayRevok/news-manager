@@ -10,7 +10,7 @@ from graphene.test import Client
 from graphql.execution.executors.asyncio import AsyncioExecutor
 from news_service_lib.models import New
 
-from webapp.graph.graphql_views import schema
+from webapp.graph import schema
 
 
 class TestNewsQueries(TestCase):

@@ -2,10 +2,9 @@ import asyncio
 import unittest
 from unittest.mock import patch
 
-from infrastructure.storage.filters.sort_direction import SortDirection
-from infrastructure.storage.filters.storage_filter_type import StorageFilterType
 from news_service_lib.models.new import New
-from lib.fixed_dict import FixedDict
+from news_service_lib.storage.filter import RangeFilter
+from news_service_lib.storage import SortDirection
 from services.news_service import NewsService
 
 MOCKED_NEW = New(title='Test title', content='Test content', source='Test source', date=10101010.00)
@@ -15,7 +14,7 @@ class TestNewsService(unittest.TestCase):
     """
     News service test cases implementation
     """
-    @patch('infrastructure.storage.storage.Storage')
+    @patch('news_service_lib.storage.implementation.Storage')
     def test_save_new(self, client):
         """
         Test persisting new
@@ -25,10 +24,9 @@ class TestNewsService(unittest.TestCase):
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.save_new(MOCKED_NEW))
 
-        client.save.assert_called_with(dict(MOCKED_NEW), exist_filter=StorageFilterType.UNIQUE,
-                                       exist_params=FixedDict(dict(key='title', value='Test title')))
+        client.save.assert_called_with(dict(MOCKED_NEW))
 
-    @patch('infrastructure.storage.storage.Storage')
+    @patch('news_service_lib.storage.implementation.Storage')
     @patch.object(NewsService, '_render_news_list')
     def test_get_news_empty(self, client, news_service_mocked):
         """
@@ -42,7 +40,7 @@ class TestNewsService(unittest.TestCase):
 
         client.get.assert_called()
 
-    @patch('infrastructure.storage.storage.Storage')
+    @patch('news_service_lib.storage.implementation.Storage')
     @patch.object(NewsService, '_render_news_list')
     def test_get_news_date_range(self, client, news_service_mocked):
         """
@@ -56,24 +54,21 @@ class TestNewsService(unittest.TestCase):
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.get_news_filtered(from_date=start, to_date=end))
 
-        client.get.assert_called_with(filter_types=[StorageFilterType.RANGE],
-                                      filters_params=[FixedDict(dict(key='date', upper=end, lower=start))],
+        client.get.assert_called_with([RangeFilter('date', upper=end, lower=start)],
                                       sort_key="date",
                                       sort_direction=SortDirection.DESC)
 
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.get_news_filtered(from_date=start))
 
-        client.get.assert_called_with(filter_types=[StorageFilterType.RANGE],
-                                      filters_params=[FixedDict(dict(key='date', upper=None, lower=start))],
+        client.get.assert_called_with([RangeFilter('date', upper=None, lower=start)],
                                       sort_key="date",
                                       sort_direction=SortDirection.DESC)
 
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.get_news_filtered(to_date=end))
 
-        client.get.assert_called_with(filter_types=[StorageFilterType.RANGE],
-                                      filters_params=[FixedDict(dict(key='date', upper=end, lower=None))],
+        client.get.assert_called_with([RangeFilter('date', upper=end, lower=None)],
                                       sort_key="date",
                                       sort_direction=SortDirection.DESC)
 

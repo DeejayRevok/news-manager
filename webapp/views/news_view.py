@@ -11,6 +11,7 @@ from aiohttp_apispec import docs
 from news_service_lib import ClassRouteTableDef, login_required
 
 from log_config import get_logger
+from services.news_service import NewsService
 from webapp.definitions import API_VERSION
 
 ROOT_PATH = '/api/news'
@@ -31,7 +32,7 @@ class NewsViews:
         Args:
             app: application associated
         """
-        self.news_service = app['news_service']
+        self.news_service: NewsService = app['news_service']
 
     @docs(
         tags=['News'],

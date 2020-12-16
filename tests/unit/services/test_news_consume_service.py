@@ -3,7 +3,7 @@ News consume service tests module
 """
 import json
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, ANY
 
 from aiohttp.web_app import Application
 from aiounittest import async_test
@@ -43,8 +43,11 @@ class TestNewsConsumeService(TestCase):
         """
         Test initializing consumer service initializes the exchange consumer in a separate process and runs the process
         """
-        self.consumer_mock.assert_called_with(**self.TEST_RABBIT_CONFIG, exchange='new-updates', queue_name='news_updates',
-                                              message_callback=self.news_consume_service.new_update)
+        self.consumer_mock.assert_called_with(**self.TEST_RABBIT_CONFIG,
+                                              exchange='new-updates',
+                                              queue_name='news_updates',
+                                              message_callback=self.news_consume_service.new_update,
+                                              logger=ANY)
         self.process_mock.assert_called_with(target=self.consumer_mock().__call__)
         self.assertTrue(self.process_mock().start.called)
 

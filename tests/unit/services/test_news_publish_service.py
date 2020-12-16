@@ -2,7 +2,7 @@
 News publish service tests module
 """
 from unittest import TestCase
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, call, ANY
 
 from aiohttp.web_app import Application
 from aiounittest import async_test
@@ -16,9 +16,9 @@ class TestNewsPublishService(TestCase):
     News publish service test cases implementation
     """
     TEST_RABBIT_CONFIG = dict(test='test')
-    TEST_NEW_INSERT_CHANGE = dict(New(title='test_title', content='test_content', date=12313.0, source='test_source',
-                                      entities=[
-                                          NamedEntity(text='test_named_entity_text', type='test_named_entity_type')]))
+    TEST_NEW_INSERT_CHANGE = New(title='test_title', content='test_content', date=12313.0, source='test_source',
+                                 entities=[
+                                     NamedEntity(text='test_named_entity_text', type='test_named_entity_type')])
 
     @patch('services.news_publish_service.Process')
     @patch('services.news_publish_service.ExchangePublisher')
@@ -44,7 +44,7 @@ class TestNewsPublishService(TestCase):
         """
         Test initializing publish service creates the exchange publisher in a separate process and runs the process
         """
-        self.publisher_mock.assert_called_with(**self.TEST_RABBIT_CONFIG, exchange='news')
+        self.publisher_mock.assert_called_with(**self.TEST_RABBIT_CONFIG, exchange='news', logger=ANY)
         self.process_mock.assert_called_with(target=self.news_publish_service.__call__)
         self.assertTrue(self.process_mock().start.called)
 
@@ -56,8 +56,8 @@ class TestNewsPublishService(TestCase):
         self.news_publish_service()
         self.publisher_mock().connect.assert_called_once()
         self.publisher_mock().initialize.assert_called_once()
-        self.publisher_mock().assert_called_with(self.TEST_NEW_INSERT_CHANGE)
-        call_calls = self.publisher_mock().mock_calls.count(call(self.TEST_NEW_INSERT_CHANGE))
+        self.publisher_mock().assert_called_with(dict(self.TEST_NEW_INSERT_CHANGE))
+        call_calls = self.publisher_mock().mock_calls.count(call(dict(self.TEST_NEW_INSERT_CHANGE)))
         self.assertEqual(call_calls, 2)
 
     @async_test
