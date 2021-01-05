@@ -7,13 +7,15 @@ from news_service_lib.storage.filter import RangeFilter
 from news_service_lib.storage import SortDirection
 from services.news_service import NewsService
 
-MOCKED_NEW = New(title='Test title', content='Test content', source='Test source', date=10101010.00)
+MOCKED_NEW = New(title='Test title', url='https://test.test', content='Test content', source='Test source',
+                 date=10101010.00)
 
 
 class TestNewsService(unittest.TestCase):
     """
     News service test cases implementation
     """
+
     @patch('news_service_lib.storage.implementation.Storage')
     def test_save_new(self, client):
         """

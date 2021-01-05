@@ -16,7 +16,8 @@ class TestNewsPublishService(TestCase):
     News publish service test cases implementation
     """
     TEST_RABBIT_CONFIG = dict(test='test')
-    TEST_NEW_INSERT_CHANGE = New(title='test_title', content='test_content', date=12313.0, source='test_source',
+    TEST_NEW_INSERT_CHANGE = New(title='test_title', url='https://test.test', content='test_content', date=12313.0,
+                                 source='test_source',
                                  entities=[
                                      NamedEntity(text='test_named_entity_text', type='test_named_entity_type')])
 
