@@ -17,8 +17,8 @@ class TestNewsQueries(TestCase):
     """
     GraphQL news queries test cases implementation
     """
-    TEST_NEW = New(title='Test1', content='Test1', source='Test1', date=101001.10)
-    TEST_ANOTHER_NEW = New(title='Test2', content='Test2', source='Test2', date=101001.10)
+    TEST_NEW = New(title='Test1', url='https://test.test', content='Test1', source='Test1', date=101001.10)
+    TEST_ANOTHER_NEW = New(title='Test2', url='https://test.test', content='Test2', source='Test2', date=101001.10)
 
     def test_get_new_title(self):
         """

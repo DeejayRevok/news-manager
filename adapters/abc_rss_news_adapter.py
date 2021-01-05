@@ -57,7 +57,7 @@ class ABCRssNewsAdapter(SourceAdapter):
 
         date = mktime(strptime(new_dict['pubDate'], self.DATE_INPUT_FORMAT))
 
-        return New(title=new_dict['title'], content=content, source='ABC', date=date)
+        return New(title=new_dict['title'], url=new_dict['link'], content=content, source='ABC', date=date)
 
     def _parse_content(self, html_string: str) -> str:
         """
