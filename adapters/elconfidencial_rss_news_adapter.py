@@ -52,10 +52,11 @@ class ConfidencialRssNewsAdapter(SourceAdapter):
         LOGGER.info('Found new with title %s', new_dict['ns0:title'])
 
         content = self._parse_content(new_dict['ns0:content']['#text'])
+        url = next(filter(lambda link: link['rel'] == 'alternate', new_dict['ns0:link']), dict(href=''))['href']
 
         date = mktime(strptime(new_dict['ns0:published'], '%Y-%m-%dT%H:%M:%S%z'))
 
-        return New(title=new_dict['ns0:title'], content=content, source='El Confidencial', date=date)
+        return New(title=new_dict['ns0:title'], url=url, content=content, source='El Confidencial', date=date)
 
     def _parse_content(self, html_string: str) -> str:
         """
