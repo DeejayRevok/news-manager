@@ -13,4 +13,4 @@ coverage==5.0.3
 psutil==5.7.0
 python-logstash==0.4.6
 bs4==0.0.1
-lxml==4.5.0
+lxml==4.6.2
