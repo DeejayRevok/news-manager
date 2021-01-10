@@ -22,7 +22,7 @@ class TestFactories(unittest.TestCase):
     Factories test cases
     """
 
-    @patch('cron.cron_factory.DEFINITIONS')
+    @patch('discovery.cron_factory.DEFINITIONS')
     def test_initialize_crons(self, mocked_definitions):
         """
         Test the correct initialization of the defined crons

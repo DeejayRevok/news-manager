@@ -8,7 +8,6 @@ from news_service_lib import HealthCheck, server_runner, get_uaa_service, uaa_au
 from news_service_lib.graphql import setup_graphql_routes
 from news_service_lib.storage import storage_factory
 
-from cron.cron_factory import initialize_crons
 from log_config import get_logger, LOG_CONFIG
 from services.news_consume_service import NewsConsumeService
 from services.news_publish_service import NewsPublishService
@@ -68,8 +67,6 @@ def init_news_manager(app: Application) -> Application:
     app.middlewares.append(validation_middleware)
 
     app.on_shutdown.append(shutdown)
-
-    initialize_crons(app)
 
     return app
 
