@@ -1,3 +1,6 @@
+"""
+News discovery celery app tasks definition module
+"""
 import json
 
 from kombu import Exchange
@@ -10,7 +13,14 @@ LOGGER = get_logger()
 
 
 @CELERY_APP.app.task
-def discover_news(definition_name):
+def discover_news(definition_name: str):
+    """
+    Discover news task
+
+    Args:
+        definition_name: name of the news discovery definition
+
+    """
     LOGGER.info(f'Executing discovery {definition_name}')
     definition = DEFINITIONS[definition_name]
     definition_instance = definition['class'](definition)

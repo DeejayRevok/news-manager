@@ -1,6 +1,10 @@
-from log_config import LOG_CONFIG, get_logger
+"""
+News discovery celery worker module
+"""
 from news_service_lib import profile_args_parser, Configuration, ConfigProfile, add_logstash_handler
 from news_service_lib.base_celery_app import BaseCeleryApp
+
+from log_config import LOG_CONFIG, get_logger
 from webapp.definitions import CONFIG_PATH
 
 

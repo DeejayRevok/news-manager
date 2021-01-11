@@ -20,7 +20,7 @@ jobs:
     - name: Lint and check score
       run: |
         export PYTHONPATH=`pwd`
-        pylint-fail-under --fail_under 9  --ignore=Dockerfile,README.md,config.ini,docker-compose.yml,requirements.txt,news_discovery_scheduler ./*
+        pylint-fail-under --fail_under 9  --ignore=Dockerfile,Dockerfile_discovery_app,Dockerfile_discovery_beat,README.md,config.ini,requirements.txt,requirements-discovery-app.txt,requirements-discovery-beat.txt,news_discovery_scheduler,tests/news_discovery_scheduler ./*
     - name: Test with unittest
       run: coverage run --source ./ --branch --omit=*__init__**,**tests**,**news_discovery_scheduler** -m unittest discover -v ./tests/news_manager
     - name: Check test coverage

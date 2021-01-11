@@ -1,3 +1,6 @@
+"""
+News discovery celery beat module
+"""
 from celery.schedules import crontab
 from news_service_lib import profile_args_parser, Configuration, ConfigProfile, add_logstash_handler
 from news_service_lib.base_celery_app import BaseCeleryApp
@@ -14,6 +17,12 @@ LOGGER = get_logger()
 
 @CELERY_BEAT.app.on_after_configure.connect
 def setup_periodic_tasks(sender, **__):
+    """
+    Set the periodic tasks for the current beat
+
+    Args:
+        sender: periodic task launcher
+    """
     LOGGER.info('Configuring news discovery beat')
     for definition_key, definition_value in DEFINITIONS.items():
         cron_definition = definition_value['cron_expression'].split(' ')
