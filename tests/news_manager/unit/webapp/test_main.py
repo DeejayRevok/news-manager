@@ -22,10 +22,9 @@ class TestMain(unittest.TestCase):
     @patch('webapp.main.NewsConsumeService')
     @patch.object(Configuration, 'get')
     @patch('webapp.main.health_check')
-    @patch('webapp.main.initialize_crons')
     @patch('webapp.main.news_view')
     @patch('webapp.main.storage_factory')
-    def test_init_app(self, storage_factory_mock, view_mock, init_crons_mock, _, config_mock, __, ___):
+    def test_init_app(self, storage_factory_mock, view_mock, _, config_mock, __, ___):
         """
         Test if the initialization of the app initializes all the required modules
         """
@@ -37,7 +36,6 @@ class TestMain(unittest.TestCase):
         base_app = Application()
         base_app['config'] = config_mock
         app = init_news_manager(base_app)
-        self.assertEqual(init_crons_mock.call_args[0][0], app)
         view_mock.setup_routes.assert_called_once()
         self.assertIsNotNone(app['news_service'])
         self.assertIsNotNone(app['uaa_service'])
