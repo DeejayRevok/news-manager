@@ -4,7 +4,10 @@ Generic source adapter module
 from abc import abstractmethod
 from typing import Iterator, Any
 
+from log_config import get_logger
 from news_service_lib.models import New
+
+LOGGER = get_logger()
 
 
 class SourceAdapter:
@@ -41,7 +44,10 @@ class SourceAdapter:
 
         """
         for item in fetched_items:
-            yield self._adapt_single(item)
+            try:
+                yield self._adapt_single(item)
+            except Exception as ex:
+                LOGGER.error('Error while adapting new: %s', str(ex))
 
     @abstractmethod
     def _fetch(self) -> Iterator[Any]:
