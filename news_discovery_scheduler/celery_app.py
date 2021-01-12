@@ -18,5 +18,6 @@ if __name__ == '__main__':
     CONFIGURATION = Configuration(ConfigProfile[ARGS['profile']], CONFIG_PATH)
     add_logstash_handler(LOG_CONFIG, CONFIGURATION.get('LOGSTASH', 'host'), int(CONFIGURATION.get('LOGSTASH', 'port')))
     CELERY_APP.configure(task_queue_name='news-discovery',
-                         broker_config=CONFIGURATION.get_section('RABBIT'))
+                         broker_config=CONFIGURATION.get_section('RABBIT'),
+                         worker_concurrency=int(CONFIGURATION.get('CELERY', 'concurrency')))
     CELERY_APP.run()
