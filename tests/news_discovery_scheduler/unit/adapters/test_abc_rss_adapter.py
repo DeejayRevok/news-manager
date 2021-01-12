@@ -1,14 +1,13 @@
 """
-El confidencial adapter tests module
+ABC rss adapter tests module
 """
+import unittest
 from os.path import join, dirname
-from unittest import TestCase
 from unittest.mock import patch
-from xml.etree.ElementTree import fromstring, Element
+from xml.etree.ElementTree import Element, fromstring
+from news_service_lib.models.new import New
 
-from news_service_lib.models import New
-
-from adapters.elconfidencial_rss_news_adapter import ConfidencialRssNewsAdapter
+from news_discovery_scheduler.discovery.adapters.abc_rss_news_adapter import ABCRssNewsAdapter
 
 
 def adapt_pass(value):
@@ -26,11 +25,11 @@ class MockedResponse:
         self.content = content
 
 
-class TestElConfidencialAdapter(TestCase):
+class TestABCRssAdapter(unittest.TestCase):
     """
-    El confidencial adapter test cases implementation
+    ABC Rss adapter test cases implementation
     """
-    XML_RESPONSE_PATH = join(dirname(dirname(__file__)), 'resources', 'el_confidencial_news_response.xml')
+    XML_RESPONSE_PATH = join(dirname(dirname(__file__)), 'resources', 'abc_news_response.xml')
 
     def setUp(self):
         """
@@ -40,9 +39,10 @@ class TestElConfidencialAdapter(TestCase):
             self.mocked_xml_response = MockedResponse(xml_response_file.read())
             self.mocked_elements = []
             rss = fromstring(self.mocked_xml_response.content)
-            for item in rss:
-                if item.tag == ConfidencialRssNewsAdapter.ROOT_NEW_TAG:
-                    self.mocked_elements.append(item)
+            for channel in rss:
+                for item in channel:
+                    if item.tag == ABCRssNewsAdapter.ROOT_NEW_TAG:
+                        self.mocked_elements.append(item)
 
     @patch('requests.get')
     def test_fetch(self, requests_get):
@@ -50,7 +50,7 @@ class TestElConfidencialAdapter(TestCase):
         Test fetching elements from rss return xml elements
         """
         requests_get.return_value = self.mocked_xml_response
-        xml_rss_adapter = ConfidencialRssNewsAdapter({'el_confidencial_rss': None})
+        xml_rss_adapter = ABCRssNewsAdapter({'abc_rss': None})
         xml_rss_adapter.adapt = adapt_pass
         fetch_return = list(xml_rss_adapter._fetch())
         self.assertEqual(len(fetch_return), 2)
@@ -61,8 +61,12 @@ class TestElConfidencialAdapter(TestCase):
         """
         Test adapt news returns parsed news
         """
-        xml_rss_adapter = ConfidencialRssNewsAdapter({'abc_rss': None})
+        xml_rss_adapter = ABCRssNewsAdapter({'abc_rss': None})
         adapt_return = list(xml_rss_adapter.adapt(self.mocked_elements))
         self.assertEqual(len(adapt_return), 2)
         for adapted_elem in adapt_return:
             self.assertTrue(isinstance(adapted_elem, New))
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -30,10 +30,12 @@ class TestNewsConsumeService(TestCase):
         self.consumer_mock = consumer_mock
         self.process_mock = process_mock
         self.news_service_mock = MagicMock()
+        self.nlp_service_mock = MagicMock()
         self.apm_mock = MagicMock()
         self.app = Application()
         self.app['apm'] = self.apm_mock
         self.app['news_service'] = self.news_service_mock
+        self.app['nlp_service_service'] = self.nlp_service_mock
         self.mocked_config = MagicMock()
         self.mocked_config.get_section.return_value = self.TEST_RABBIT_CONFIG
         self.app['config'] = self.mocked_config
@@ -45,9 +47,9 @@ class TestNewsConsumeService(TestCase):
         Test initializing consumer service initializes the exchange consumer in a separate process and runs the process
         """
         self.consumer_mock.assert_called_with(**self.TEST_RABBIT_CONFIG,
-                                              exchange='new-updates',
-                                              queue_name='news_updates',
-                                              message_callback=self.news_consume_service.new_update,
+                                              exchange='news-internal-exchange',
+                                              queue_name='news-exchange',
+                                              message_callback=self.news_consume_service.handle_new,
                                               logger=ANY)
         self.process_mock.assert_called_with(target=self.consumer_mock().__call__)
         self.assertTrue(self.process_mock().start.called)
@@ -63,19 +65,36 @@ class TestNewsConsumeService(TestCase):
             """
             pass
 
+        async def mock_hydrate_new_success():
+            """
+            Test mocked asynchronous method response
+            """
+            pass
+
         self.news_service_mock.save_new.return_value = mock_save_new_success()
-        self.news_consume_service.new_update(None, None, None, json.dumps(dict(self.TEST_NEW)))
-        self.apm_mock.client.begin_transaction.assert_called_with('consume')
+        self.news_service_mock.get_new_by_title.side_effect = KeyError()
+        self.nlp_service_mock.hydrate_new.return_value = mock_hydrate_new_success()
+        self.news_consume_service.handle_new(None, None, None, json.dumps(dict(self.TEST_NEW)))
+        self.apm_mock.client.begin_transaction.assert_called_with('Consume')
         self.news_service_mock.save_new.assert_called_with(self.TEST_NEW)
-        self.apm_mock.client.end_transaction.assert_called_with('New update', 'OK')
+        self.apm_mock.client.end_transaction.assert_called_with('New handle', 'OK')
 
     def test_new_update_fail(self):
         """
         Test new update failed creates an apm fail transaction and captures the exception
         """
+
+        async def mock_hydrate_new_success():
+            """
+            Test mocked asynchronous method response
+            """
+            pass
+
+        self.news_service_mock.get_new_by_title.side_effect = KeyError()
+        self.nlp_service_mock.hydrate_new.return_value = mock_hydrate_new_success()
         self.news_service_mock.save_new.side_effect = Exception('Test')
-        self.news_consume_service.new_update(None, None, None, json.dumps(dict(self.TEST_NEW)))
-        self.apm_mock.client.end_transaction.assert_called_with('New update', 'FAIL')
+        self.news_consume_service.handle_new(None, None, None, json.dumps(dict(self.TEST_NEW)))
+        self.apm_mock.client.end_transaction.assert_called_with('New handle', 'FAIL')
         self.apm_mock.client.capture_exception.assert_called_once()
 
     @async_test

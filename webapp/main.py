@@ -3,12 +3,13 @@ Application main module
 """
 from aiohttp.web_app import Application
 from aiohttp_apispec import validation_middleware
+
+from news_discovery_scheduler.celery_app import CELERY_APP
 from news_service_lib import HealthCheck, server_runner, get_uaa_service, uaa_auth_middleware, initialize_apm, \
     NlpServiceService
 from news_service_lib.graphql import setup_graphql_routes
 from news_service_lib.storage import storage_factory
 
-from cron.cron_factory import initialize_crons
 from log_config import get_logger, LOG_CONFIG
 from services.news_consume_service import NewsConsumeService
 from services.news_publish_service import NewsPublishService
@@ -17,6 +18,7 @@ from webapp.definitions import CONFIG_PATH, health_check, API_VERSION
 from webapp.graph import schema
 from webapp.middlewares import error_middleware
 from webapp.views import news_view
+from news_discovery_scheduler.celery_tasks import initialize_worker
 
 
 async def shutdown(app: Application):
@@ -63,13 +65,18 @@ def init_news_manager(app: Application) -> Application:
     news_view.setup_routes(app)
     setup_graphql_routes(app, schema, get_logger())
 
+    CELERY_APP.configure(task_queue_name='news-discovery',
+                         broker_config=app['config'].get_section('RABBIT'),
+                         worker_concurrency=int(app['config'].get('CELERY', 'concurrency')))
+
+    for _ in range(int(app['config'].get('CELERY', 'concurrency'))):
+        initialize_worker.delay(app['config'].get_section('RABBIT'))
+
     app.middlewares.append(error_middleware)
     app.middlewares.append(uaa_auth_middleware)
     app.middlewares.append(validation_middleware)
 
     app.on_shutdown.append(shutdown)
-
-    initialize_crons(app)
 
     return app
 

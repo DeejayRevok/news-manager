@@ -11,7 +11,7 @@ from lxml import html
 from news_service_lib.models import New
 from xmltodict import parse
 
-from adapters.source_adapter import SourceAdapter
+from news_discovery_scheduler.discovery.adapters.source_adapter import SourceAdapter
 from log_config import get_logger
 
 LOGGER = get_logger()
