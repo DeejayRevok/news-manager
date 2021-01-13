@@ -1,6 +1,8 @@
 """
 News discovery celery worker module
 """
+from celery.concurrency import asynpool
+
 from news_service_lib import profile_args_parser, Configuration, ConfigProfile, add_logstash_handler
 from news_service_lib.base_celery_app import BaseCeleryApp
 
@@ -8,6 +10,7 @@ from log_config import LOG_CONFIG, get_logger
 from webapp.definitions import CONFIG_PATH
 
 
+asynpool.PROC_ALIVE_TIMEOUT = 60.0
 CELERY_APP = BaseCeleryApp('News discovery app', ['news_discovery_scheduler.celery_tasks'])
 LOGGER = get_logger()
 
