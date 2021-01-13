@@ -28,11 +28,13 @@ def initialize_worker(*_, **__):
 
     config_profile = ConfigProfile[os.environ.get('PROFILE')] if 'PROFILE' in os.environ else ConfigProfile.LOCAL
     configuration = Configuration(config_profile, CONFIG_PATH)
-    EXCHANGE_PUBLISHER = ExchangePublisher(**configuration.get_section('RABBIT'),
+
+    exchange_publisher = ExchangePublisher(**configuration.get_section('RABBIT'),
                                            exchange='news-internal-exchange',
                                            logger=LOGGER)
-    EXCHANGE_PUBLISHER.connect()
-    EXCHANGE_PUBLISHER.initialize()
+    exchange_publisher.connect()
+    exchange_publisher.initialize()
+    EXCHANGE_PUBLISHER = exchange_publisher
 
 
 @CELERY_APP.app.task(name='discover_news')
