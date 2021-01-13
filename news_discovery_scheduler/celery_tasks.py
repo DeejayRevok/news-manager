@@ -1,33 +1,38 @@
 """
 News discovery celery app tasks definition module
 """
-import json
+import os
+from typing import Optional
 
-from pika import BlockingConnection, ConnectionParameters, PlainCredentials
+from celery.signals import worker_process_init
+
+from news_service_lib import ConfigProfile, Configuration
+from news_service_lib.messaging import ExchangePublisher
 
 from log_config import get_logger
 from news_discovery_scheduler.celery_app import CELERY_APP
 from news_discovery_scheduler.discovery.definitions import DEFINITIONS
+from webapp.definitions import CONFIG_PATH
 
 LOGGER = get_logger()
-QUEUE_PROVIDER_CONFIG = None
+EXCHANGE_PUBLISHER: Optional[ExchangePublisher] = None
 
 
-@CELERY_APP.app.task(name='initialize_worker')
-def initialize_worker(broker_config: dict):
+@worker_process_init.connect()
+def initialize_worker(*_, **__):
     """
     Initialize the celery worker global variables
-
-    Args:
-        broker_config: broker configuration
-
     """
-    global QUEUE_PROVIDER_CONFIG
+    global EXCHANGE_PUBLISHER
     LOGGER.info('Initializing worker')
-    if QUEUE_PROVIDER_CONFIG is None:
-        QUEUE_PROVIDER_CONFIG = broker_config
-    else:
-        LOGGER.info('Queue config already initialized')
+
+    config_profile = ConfigProfile[os.environ.get('PROFILE')] if 'PROFILE' in os.environ else ConfigProfile.LOCAL
+    configuration = Configuration(config_profile, CONFIG_PATH)
+    EXCHANGE_PUBLISHER = ExchangePublisher(**configuration.get_section('RABBIT'),
+                                           exchange='news-internal-exchange',
+                                           logger=LOGGER)
+    EXCHANGE_PUBLISHER.connect()
+    EXCHANGE_PUBLISHER.initialize()
 
 
 @CELERY_APP.app.task(name='discover_news')
@@ -39,23 +44,13 @@ def discover_news(definition_name: str):
         definition_name: name of the news discovery definition
 
     """
-    global QUEUE_PROVIDER_CONFIG
-    if QUEUE_PROVIDER_CONFIG:
+    global EXCHANGE_PUBLISHER
+    if EXCHANGE_PUBLISHER:
         LOGGER.info(f'Executing discovery {definition_name}')
         definition = DEFINITIONS[definition_name]
         definition_instance = definition['class'](definition)
-        connection = BlockingConnection(
-            ConnectionParameters(host=QUEUE_PROVIDER_CONFIG['host'],
-                                 port=int(QUEUE_PROVIDER_CONFIG['port']),
-                                 credentials=PlainCredentials(QUEUE_PROVIDER_CONFIG['user'],
-                                                              QUEUE_PROVIDER_CONFIG['password'])))
-        channel = connection.channel()
-        channel.exchange_declare(exchange='news-internal-exchange', exchange_type='fanout', durable=True)
 
         for discovered_new in definition_instance():
-            channel.basic_publish(exchange='news-internal-exchange', routing_key='',
-                                  body=json.dumps(dict(discovered_new)))
-        channel.close()
-        connection.close()
+            EXCHANGE_PUBLISHER(dict(discovered_new))
     else:
-        LOGGER.error('Que provider not initialized, skipping discovery')
+        LOGGER.error('Queue provider not initialized, skipping discovery')
