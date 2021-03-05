@@ -93,11 +93,18 @@ class NewsService:
             self._client.get(filters_list, sort_key="date", sort_direction=SortDirection.DESC))
 
     async def delete_new(self, new: New):
+        """
+        Delete the input new
+
+        Args:
+            new: new to delete
+
+        """
         new_delete = self._client.get_one(filters=[MatchFilter('title', new.title)])
         if new_delete:
             self._client.delete(new_delete['_id'])
 
-    def consume_new_inserts(self) -> Iterator[New]:
+    def consume_new_inserts(self) -> Iterator[Tuple[str, New]]:
         """
         Consume the new insertions
 
@@ -105,7 +112,7 @@ class NewsService:
 
         """
         for document in self._client.consume_inserts():
-            yield self._render_new(document)
+            yield str(document['_id']), self._render_new(document)
 
     @staticmethod
     def _render_news_list(news_list: Iterator[dict]) -> Iterator[New]:
