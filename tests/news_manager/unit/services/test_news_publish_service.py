@@ -27,14 +27,16 @@ class TestNewsPublishService(TestCase):
         """
         Initialize the publisher service mocking necessary properties
         """
+        self.locker_client_mock = MagicMock()
         self.publisher_mock = publisher_mock
         self.process_mock = process_mock
         self.news_service_mock = MagicMock()
-        self.news_service_mock.consume_new_inserts.return_value = [self.TEST_NEW_INSERT_CHANGE,
-                                                                   self.TEST_NEW_INSERT_CHANGE]
+        self.news_service_mock.consume_new_inserts.return_value = [('test', self.TEST_NEW_INSERT_CHANGE),
+                                                                   ('test', self.TEST_NEW_INSERT_CHANGE)]
         self.apm_mock = MagicMock()
         self.app = Application()
         self.app['news_service'] = self.news_service_mock
+        self.app['locker_client'] = self.locker_client_mock
         self.mocked_config = MagicMock()
         self.mocked_config.get_section.return_value = self.TEST_RABBIT_CONFIG
         self.app['config'] = self.mocked_config
@@ -54,6 +56,8 @@ class TestNewsPublishService(TestCase):
         Test calling the publish service initializes the exchange publisher and for each new insertion calls the
         publisher with the new insertion
         """
+        self.locker_client_mock.acquire.return_value = (MagicMock(), True)
+        
         self.news_publish_service()
         self.publisher_mock().connect.assert_called_once()
         self.publisher_mock().initialize.assert_called_once()

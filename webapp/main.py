@@ -1,9 +1,13 @@
 """
 Application main module
 """
+import redis_lock
 from aiohttp.web_app import Application
 from aiohttp_apispec import validation_middleware
+from redis import Redis, BlockingConnectionPool
 
+from infrastructure.locker import locker_factory
+from infrastructure.locker.redis_locker import RedisLocker
 from news_service_lib import HealthCheck, server_runner, get_uaa_service, uaa_auth_middleware, initialize_apm, \
     NlpServiceService
 from news_service_lib.graphql import setup_graphql_routes
@@ -41,9 +45,13 @@ def init_news_manager(app: Application) -> Application:
     """
 
     storage_config = app['config'].get_section(app['config'].get('server', 'storage'))
-
     storage_client = storage_factory(app['config'].get('server', 'storage'), storage_config, get_logger())
     app['storage_client'] = storage_client._mongo_client
+
+    locker_type = app['config'].get('server', 'locker')
+    locker_client = locker_factory(locker_type, **app['config'].get_section(locker_type))
+    app['locker_client'] = locker_client
+    locker_client.reset()
 
     app['news_service'] = NewsService(storage_client)
 
