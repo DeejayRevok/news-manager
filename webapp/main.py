@@ -56,7 +56,7 @@ def init_news_manager(app: Application) -> Application:
     app['uaa_service'] = get_uaa_service(uaa_config)
 
     app['nlp_service_service'] = NlpServiceService(broker_config=app['config'].get_section('RABBIT'),
-                                                   redis_config=app['config'].get_section('REDIS_CELERY'))
+                                                   redis_config=app['config'].get_section('REDIS_NLP_WORKER'))
 
     initialize_apm(app)
 
