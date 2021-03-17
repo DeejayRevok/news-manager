@@ -58,7 +58,7 @@ class NewsConsumeService:
             await self._news_service.save_new(new)
             saved_new = None
 
-        if not saved_new or (saved_new and not new.hydrated):
+        if not saved_new or (saved_new and not saved_new.hydrated and not new.hydrated):
             try:
                 await self._nlp_service_service.hydrate_new(new)
             except ConnectionError:
