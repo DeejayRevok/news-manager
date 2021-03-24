@@ -12,6 +12,6 @@ coverage==5.0.3
 psutil==5.7.0
 python-logstash==0.4.6
 bs4==0.0.1
-lxml==4.6.2
+lxml==4.6.3
 redis==3.5.3
 python-redis-lock==3.7.0
