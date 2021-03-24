@@ -58,7 +58,7 @@ def init_news_manager(app: Application) -> Application:
     app['nlp_service_service'] = NlpServiceService(broker_config=app['config'].get_section('RABBIT'),
                                                    redis_config=app['config'].get_section('REDIS_NLP_WORKER'))
 
-    initialize_apm(app)
+    initialize_apm(app, service_name='news-manager')
 
     app['news_consume_service'] = NewsConsumeService(app)
     app['news_publish_service'] = NewsPublishService(app)

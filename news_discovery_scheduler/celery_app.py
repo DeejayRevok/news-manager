@@ -2,6 +2,8 @@
 News discovery celery worker module
 """
 from celery.concurrency import asynpool
+from elasticapm import Client
+from elasticapm.contrib.celery import register_instrumentation, register_exception_tracking
 
 from news_service_lib import profile_args_parser, Configuration, ConfigProfile, add_logstash_handler
 from news_service_lib.base_celery_app import BaseCeleryApp
@@ -23,4 +25,13 @@ if __name__ == '__main__':
     CELERY_APP.configure(task_queue_name='news-discovery',
                          broker_config=CONFIGURATION.get_section('RABBIT'),
                          worker_concurrency=int(CONFIGURATION.get('CELERY', 'concurrency')))
+
+    apm_client = Client(config={
+        'SERVICE_NAME': 'news-discovery-app',
+        'SECRET_TOKEN': CONFIGURATION.get('ELASTIC_APM', 'secret-token'),
+        'SERVER_URL': f'http://{CONFIGURATION.get("ELASTIC_APM", "host")}:{CONFIGURATION.get("ELASTIC_APM", "port")}'
+    })
+    register_instrumentation(apm_client)
+    register_exception_tracking(apm_client)
+
     CELERY_APP.run()
