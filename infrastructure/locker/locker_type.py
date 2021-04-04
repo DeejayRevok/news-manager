@@ -12,7 +12,7 @@ class LockerType(Enum):
     Locker types definition:
     - REDIS: Redis locker
     """
-    REDIS = RedisLocker
+    redis = RedisLocker
 
     def instance(self, **instance_config) -> Locker:
         """

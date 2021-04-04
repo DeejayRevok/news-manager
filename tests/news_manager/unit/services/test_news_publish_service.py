@@ -6,9 +6,12 @@ from unittest.mock import patch, MagicMock, call, ANY
 
 from aiohttp.web_app import Application
 from aiounittest import async_test
+from dynaconf.loaders import settings_loader
 from news_service_lib.models import New, NamedEntity
 
+from config import config
 from services.news_publish_service import NewsPublishService
+from tests import TEST_CONFIG_PATH
 
 
 class TestNewsPublishService(TestCase):
@@ -20,6 +23,14 @@ class TestNewsPublishService(TestCase):
                                  source='test_source',
                                  entities=[
                                      NamedEntity(text='test_named_entity_text', type='test_named_entity_type')])
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Initialize the test case environment
+        """
+        settings_loader(config, filename=TEST_CONFIG_PATH)
+        config.rabbit = cls.TEST_RABBIT_CONFIG
 
     @patch('services.news_publish_service.Process')
     @patch('services.news_publish_service.ExchangePublisher')
