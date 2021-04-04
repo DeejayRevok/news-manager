@@ -1,13 +1,10 @@
 """
 News manager webapp definitions module
 """
-from os.path import join, dirname
-
 from aiohttp.web_app import Application
 from news_service_lib.storage.mongo_utils import mongo_health_check
 
 API_VERSION = 'v1'
-CONFIG_PATH = join(dirname(dirname(__file__, )), 'configs')
 
 
 async def health_check(app: Application) -> bool:

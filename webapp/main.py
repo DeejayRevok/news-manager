@@ -3,18 +3,18 @@ Application main module
 """
 from aiohttp.web_app import Application
 from aiohttp_apispec import validation_middleware
-
-from infrastructure.locker import locker_factory
 from news_service_lib import HealthCheck, server_runner, get_uaa_service, uaa_auth_middleware, initialize_apm, \
     NlpServiceService
 from news_service_lib.graphql import setup_graphql_routes
 from news_service_lib.storage import storage_factory
 
+from config import config, CONFIGS_PATH
+from infrastructure.locker import locker_factory
 from log_config import get_logger, LOG_CONFIG
 from services.news_consume_service import NewsConsumeService
 from services.news_publish_service import NewsPublishService
 from services.news_service import NewsService
-from webapp.definitions import CONFIG_PATH, health_check, API_VERSION
+from webapp.definitions import health_check, API_VERSION
 from webapp.graph import schema
 from webapp.middlewares import error_middleware
 from webapp.views import news_view
@@ -40,25 +40,23 @@ def init_news_manager(app: Application) -> Application:
 
     Returns: web application initialized
     """
-
-    storage_config = app['config'].get_section(app['config'].get('server', 'storage'))
-    storage_client = storage_factory(app['config'].get('server', 'storage'), storage_config, get_logger())
+    storage_type = config.server.storage
+    storage_client = storage_factory(storage_type, config[storage_type], get_logger())
     app['storage_client'] = storage_client._mongo_client
 
-    locker_type = app['config'].get('server', 'locker')
-    locker_client = locker_factory(locker_type, **app['config'].get_section(locker_type))
+    locker_type = config.server.locker
+    locker_client = locker_factory(locker_type, **config[locker_type])
     app['locker_client'] = locker_client
     locker_client.reset()
 
     app['news_service'] = NewsService(storage_client)
 
-    uaa_config = app['config'].get_section('UAA')
-    app['uaa_service'] = get_uaa_service(uaa_config)
+    app['uaa_service'] = get_uaa_service(config.uaa)
 
-    app['nlp_service_service'] = NlpServiceService(broker_config=app['config'].get_section('RABBIT'),
-                                                   redis_config=app['config'].get_section('REDIS_NLP_WORKER'))
+    app['nlp_service_service'] = NlpServiceService(broker_config=config.rabbit,
+                                                   redis_config=config.redis_nlp_worker)
 
-    initialize_apm(app, service_name='news-manager')
+    initialize_apm(app, config, service_name='news-manager')
 
     app['news_consume_service'] = NewsConsumeService(app)
     app['news_publish_service'] = NewsPublishService(app)
@@ -78,4 +76,4 @@ def init_news_manager(app: Application) -> Application:
 
 
 if __name__ == '__main__':
-    server_runner('News manager', init_news_manager, API_VERSION, CONFIG_PATH, LOG_CONFIG, get_logger)
+    server_runner('News manager', init_news_manager, API_VERSION, CONFIGS_PATH, config, LOG_CONFIG, get_logger)

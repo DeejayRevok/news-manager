@@ -10,3 +10,4 @@ python-logstash==0.4.6
 bs4==0.0.1
 lxml==4.6.3
 pika==1.1.0
+dynaconf

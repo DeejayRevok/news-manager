@@ -4,8 +4,11 @@ News discovery celery tasks tests module
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from news_discovery_scheduler.celery_tasks import initialize_worker
+from dynaconf.loaders import settings_loader
 from news_service_lib.models import New
+
+from config import config
+from tests import TEST_CONFIG_PATH
 
 
 class TestCeleryTasks(TestCase):
@@ -19,6 +22,14 @@ class TestCeleryTasks(TestCase):
     MOCKED_NEW_2 = New(title='Test title 2', url='https://test.test', content='Test content', source='Test source',
                        date=10101010.00)
 
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Initialize the test case environment
+        """
+        settings_loader(config, filename=TEST_CONFIG_PATH)
+        config.rabbit = cls.TEST_QUEUE_CONFIG
+
     @patch('news_discovery_scheduler.celery_tasks.DEFINITIONS')
     @patch('news_discovery_scheduler.celery_tasks.PlainCredentials')
     @patch('news_discovery_scheduler.celery_tasks.ConnectionParameters')
@@ -29,13 +40,13 @@ class TestCeleryTasks(TestCase):
         Test publishing new declares the exchange, publish the new, sets hydrated of new as true, closes the channel
         and closes the connection
         """
+
         definition_class_mock = MagicMock()
         definition_class_mock().return_value = [self.MOCKED_NEW_1, self.MOCKED_NEW_2]
         definitions_mock.__getitem__.return_value = {'class': definition_class_mock}
 
         channel_mock = MagicMock()
         mocked_connection().channel.return_value = channel_mock
-        initialize_worker()
 
         from news_discovery_scheduler.celery_tasks import discover_news
         discover_news('test')

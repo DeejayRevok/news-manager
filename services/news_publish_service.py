@@ -5,10 +5,10 @@ import sys
 from multiprocessing import Process
 
 from aiohttp.web_app import Application
-
-from infrastructure.locker import Locker
 from news_service_lib.messaging.exchange_publisher import ExchangePublisher
 
+from infrastructure.locker import Locker
+from config import config
 from log_config import get_logger
 from services.news_service import NewsService
 
@@ -30,8 +30,7 @@ class NewsPublishService:
         self._app = app
         self._news_service: NewsService = app['news_service']
         self._locker_client: Locker = app['locker_client']
-        self._exchange_publisher = ExchangePublisher(**app['config'].get_section('RABBIT'), exchange='news',
-                                                     logger=LOGGER)
+        self._exchange_publisher = ExchangePublisher(**config.rabbit, exchange='news', logger=LOGGER)
 
         if not self._exchange_publisher.test_connection():
             LOGGER.error('Error connecting to the queue provider. Exiting...')
