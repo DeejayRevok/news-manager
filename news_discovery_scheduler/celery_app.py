@@ -1,6 +1,8 @@
 """
 News discovery celery worker module
 """
+import sys
+
 from celery.concurrency import asynpool
 from elasticapm import Client
 from elasticapm.contrib.celery import register_instrumentation, register_exception_tracking
@@ -11,8 +13,7 @@ from news_service_lib.server_utils import load_config
 
 from config import CONFIGS_PATH, config
 from log_config import LOG_CONFIG, get_logger
-from news_discovery_scheduler.container_config import load
-
+from news_discovery_scheduler.container_config import load, container
 
 asynpool.PROC_ALIVE_TIMEOUT = 60.0
 CELERY_APP = BaseCeleryApp('News discovery app', ['news_discovery_scheduler.celery_tasks'])
@@ -29,6 +30,10 @@ def main(profile: str):
     """
     load_config(profile, CONFIGS_PATH, config)
     load()
+    publisher = container.get('exchange_publisher')
+    if not publisher.test_connection():
+        LOGGER.error('Error connecting to the queue provider. Exiting...')
+        sys.exit(1)
 
     add_logstash_handler(LOG_CONFIG, config.logstash.host, config.logstash.port)
     CELERY_APP.configure(task_queue_name='news-discovery',
