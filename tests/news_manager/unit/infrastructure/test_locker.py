@@ -18,7 +18,7 @@ class TestLocker(TestCase):
         """
         Test if the specified locker exists the locker factory returns a Locker instance
         """
-        locker_instance = locker_factory(LockerType.redis.name, host='test', port='port', password='')
+        locker_instance = locker_factory(LockerType.redis.name, dict(host='test', port='port', password=''))
         self.assertIsInstance(locker_instance, Locker)
 
     def test_locker_factory_not_exists(self):
@@ -26,4 +26,4 @@ class TestLocker(TestCase):
         Test if the specified locker not exists a NotImplementedError is raised
         """
         with self.assertRaises(NotImplementedError):
-            locker_factory('NON_EXISTING_LOCKER_TYPE')
+            locker_factory('NON_EXISTING_LOCKER_TYPE', {})

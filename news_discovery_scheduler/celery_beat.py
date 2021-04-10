@@ -6,13 +6,12 @@ from elasticapm import Client
 from elasticapm.contrib.celery import register_instrumentation, register_exception_tracking
 from news_service_lib import profile_args_parser, add_logstash_handler
 from news_service_lib.base_celery_app import BaseCeleryApp
+from news_service_lib.server_utils import load_config
 
 from config import CONFIGS_PATH, config
-
 from log_config import LOG_CONFIG, get_logger
 from news_discovery_scheduler.discovery.definitions import DEFINITIONS
 from news_discovery_scheduler.celery_tasks import discover_news
-from news_service_lib.server_utils import load_config
 
 CELERY_BEAT = BaseCeleryApp('News discovery app beat')
 LOGGER = get_logger()
@@ -49,7 +48,7 @@ def main(profile: str):
     apm_client = Client(config={
         'SERVICE_NAME': 'news-discovery-beat',
         'SECRET_TOKEN': config.elastic_apm.secret_token,
-        'SERVER_URL': f'http://{config.elastic_apm.host}:{config.elastic_apm.port}'
+        'SERVER_URL': config.elastic_apm.url
     })
     register_instrumentation(apm_client)
     register_exception_tracking(apm_client)

@@ -6,13 +6,16 @@ import sys
 from multiprocessing import Process
 import json
 
-from aiohttp.web_app import Application
+from dacite import from_dict
 
+from news_service_lib import NlpServiceService
 from news_service_lib.messaging.exchange_consumer import ExchangeConsumer
 from news_service_lib.models import New, NamedEntity
 
 from config import config
 from log_config import get_logger
+from services.news_service import NewsService
+from webapp.container_config import container
 
 LOGGER = get_logger()
 
@@ -22,17 +25,17 @@ class NewsConsumeService:
     News consumer service implementation
     """
 
-    def __init__(self, app: Application):
+    def __init__(self, news_service: NewsService, nlp_service_service: NlpServiceService):
         """
         Initialize the news consume service for the specified app
 
         Args:
-            app: application associated
+            news_service: service used to manage news
+            nlp_service_service: service used to communicate with the nlp service
         """
         LOGGER.info('Starting news consumer service')
-        self._app = app
-        self._news_service = app['news_service']
-        self._nlp_service_service = app['nlp_service_service']
+        self._news_service = news_service
+        self._nlp_service_service = nlp_service_service
         self._exchange_consumer = ExchangeConsumer(**config.rabbit,
                                                    exchange='news-internal-exchange',
                                                    queue_name='news-exchange',
@@ -79,25 +82,17 @@ class NewsConsumeService:
 
         """
         LOGGER.info('Handling new')
-        self._app['apm'].client.begin_transaction('Consume')
+        apm = container.get('apm')
+        apm.begin_transaction('consume')
         try:
             body = json.loads(body)
-            new = New(title=body['title'],
-                      url=body['url'],
-                      content=body['content'],
-                      source=body['source'],
-                      date=body['date'],
-                      hydrated=body['hydrated'],
-                      summary=body['summary'],
-                      sentiment=body['sentiment'],
-                      entities=[NamedEntity(**entity) for entity in body['entities']],
-                      noun_chunks=body['noun_chunks'])
+            new = from_dict(New, body)
             asyncio.run(self._handle_new(new))
-            self._app['apm'].client.end_transaction('New handle', 'OK')
+            apm.end_transaction('New handle', 'OK')
         except Exception as ex:
             LOGGER.error('Error while updating new %s', str(ex), exc_info=True)
-            self._app['apm'].client.end_transaction('New handle', 'FAIL')
-            self._app['apm'].client.capture_exception()
+            apm.end_transaction('New handle', 'FAIL')
+            apm.capture_exception()
 
     async def shutdown(self):
         """

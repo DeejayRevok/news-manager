@@ -1,15 +1,17 @@
 """
 Graphql news queries module
 """
+from dataclasses import asdict
 from datetime import datetime
 from typing import List
 
 from graphene import ObjectType, List as GraphList, Field, Argument, String, Boolean, Float
-from graphql import ResolveInfo
-
-from log_config import get_logger
 from news_service_lib.graphql import login_required, CustomDateTime
 from news_service_lib.graphql.model import New
+
+from log_config import get_logger
+from services.news_service import NewsService
+from webapp.container_config import container
 
 LOGGER = get_logger()
 
@@ -31,14 +33,13 @@ class NewsQuery(ObjectType):
                 description='New with the given title')
 
     @login_required
-    async def resolve_news(self, info: ResolveInfo, source: str = None, hydration: bool = None,
+    async def resolve_news(self, _, source: str = None, hydration: bool = None,
                            sentiment: float = None, higher: bool = True, from_date: datetime = None,
                            to_date: datetime = None) -> List[dict]:
         """
         News list graphql query
 
         Args:
-            info: query information
             source: news source filter
             hydration: news hydration flag filter
             sentiment: news sentiment threshold filter
@@ -50,25 +51,25 @@ class NewsQuery(ObjectType):
 
         """
         LOGGER.info('Resolving multiple news')
-        app = info.context['request'].app
+        news_service: NewsService = container.get('news_service')
         return [new.dto(CustomDateTime.DATE_FORMAT) for new in
-                await app['news_service'].get_news_filtered(source=source, hydration=hydration,
-                                                            sentiment=(sentiment, higher),
-                                                            from_date=from_date.timestamp() if from_date else None,
-                                                            to_date=to_date.timestamp() if to_date else None)]
+                await news_service.get_news_filtered(source=source,
+                                                     hydration=hydration,
+                                                     sentiment=(sentiment, higher),
+                                                     from_date=from_date.timestamp() if from_date else None,
+                                                     to_date=to_date.timestamp() if to_date else None)]
 
     @login_required
-    async def resolve_new(self, info: ResolveInfo, title: int) -> dict:
+    async def resolve_new(self, _, title: str) -> dict:
         """
         Single new graphql query
 
         Args:
-            info: query information
             title: title to get new
 
         Returns: queried new
 
         """
         LOGGER.info('Resolving new %s', title)
-        app = info.context['request'].app
-        return dict(await app['news_service'].get_new_by_title(title))
+        news_service: NewsService = container.get('news_service')
+        return asdict(await news_service.get_new_by_title(title))

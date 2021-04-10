@@ -1,5 +1,6 @@
 import asyncio
 import unittest
+from dataclasses import asdict
 from unittest.mock import patch
 
 from news_service_lib.models.new import New
@@ -26,7 +27,7 @@ class TestNewsService(unittest.TestCase):
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.save_new(MOCKED_NEW))
 
-        client.save.assert_called_with(dict(MOCKED_NEW))
+        client.save.assert_called_with(asdict(MOCKED_NEW))
 
     @patch('news_service_lib.storage.implementation.Storage')
     @patch.object(NewsService, '_render_news_list')
@@ -79,7 +80,7 @@ class TestNewsService(unittest.TestCase):
         Test news rendering
         """
 
-        rendered_new = next(NewsService._render_news_list([dict(MOCKED_NEW)]), None)
+        rendered_new = next(NewsService._render_news_list([asdict(MOCKED_NEW)]), None)
 
         self.assertIsNotNone(rendered_new)
         self.assertIsInstance(rendered_new, New)
