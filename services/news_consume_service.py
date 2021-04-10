@@ -10,7 +10,7 @@ from dacite import from_dict
 
 from news_service_lib import NlpServiceService
 from news_service_lib.messaging.exchange_consumer import ExchangeConsumer
-from news_service_lib.models import New, NamedEntity
+from news_service_lib.models import New
 
 from config import config
 from log_config import get_logger
