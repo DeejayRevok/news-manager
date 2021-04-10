@@ -2,9 +2,9 @@
 News publish service module
 """
 import sys
+from dataclasses import asdict
 from multiprocessing import Process
 
-from aiohttp.web_app import Application
 from news_service_lib.messaging.exchange_publisher import ExchangePublisher
 
 from infrastructure.locker import Locker
@@ -20,16 +20,16 @@ class NewsPublishService:
     News publish service implementation
     """
 
-    def __init__(self, app: Application):
+    def __init__(self, news_service: NewsService, locker_client: Locker):
         """
         Start a new process which listens the new inserts and publish them in the exchange configured
 
         Args:
-            app: application associated
+            news_service: service used to manage news
+            locker_client: service used to communicate with the locking system
         """
-        self._app = app
-        self._news_service: NewsService = app['news_service']
-        self._locker_client: Locker = app['locker_client']
+        self._news_service = news_service
+        self._locker_client = locker_client
         self._exchange_publisher = ExchangePublisher(**config.rabbit, exchange='news', logger=LOGGER)
 
         if not self._exchange_publisher.test_connection():
@@ -51,7 +51,7 @@ class NewsPublishService:
                 LOGGER.info('Listened inserted new %s with id %s', new_inserted.title, storage_id)
                 lock, lock_acquired = self._locker_client.acquire(storage_id, blocking=False)
                 if lock_acquired:
-                    self._exchange_publisher(dict(new_inserted))
+                    self._exchange_publisher(asdict(new_inserted))
                     lock.release()
                 else:
                     LOGGER.info('New stored with id %s already distributed', storage_id)

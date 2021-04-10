@@ -27,13 +27,13 @@ class LockerType(Enum):
         return self.value(**instance_config)
 
 
-def locker_factory(locker_type_name: str, **locker_config) -> Locker:
+def locker_factory(locker_type_name: str, locker_config) -> Locker:
     """
     Get the locker with the specified parameters
 
     Args:
         locker_type_name: name of the locker type to generate
-        **locker_config: configuration for the locker
+        locker_config: configuration for the locker
 
     Returns: configured locker instance
 

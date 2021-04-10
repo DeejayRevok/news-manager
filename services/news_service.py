@@ -1,7 +1,10 @@
 """
 News service module
 """
+from dataclasses import asdict
 from typing import Iterator, Tuple, Union
+
+from dacite import from_dict
 
 from news_service_lib.models import New
 from news_service_lib.storage.implementation import MongoStorage
@@ -38,7 +41,7 @@ class NewsService:
 
         """
         await self.delete_new(new)
-        self._client.save(dict(new))
+        self._client.save(asdict(new))
 
     async def get_new_by_title(self, title: str) -> New:
         """
@@ -141,4 +144,4 @@ class NewsService:
         """
         if '_id' in new:
             del new['_id']
-        return New(**new)
+        return from_dict(New, new)

@@ -16,3 +16,6 @@ lxml==4.6.3
 redis==3.5.3
 python-redis-lock==3.7.0
 dynaconf
+elastic-apm==6.0.0
+pypendency==0.1.0
+dacite==1.6.0

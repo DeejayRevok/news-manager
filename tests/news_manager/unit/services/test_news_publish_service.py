@@ -1,16 +1,20 @@
 """
 News publish service tests module
 """
+from dataclasses import asdict
 from unittest import TestCase
-from unittest.mock import patch, MagicMock, call, ANY
+from unittest.mock import patch, call, ANY, Mock, MagicMock
 
 from aiohttp.web_app import Application
 from aiounittest import async_test
 from dynaconf.loaders import settings_loader
+
+from infrastructure.locker import Locker
 from news_service_lib.models import New, NamedEntity
 
 from config import config
 from services.news_publish_service import NewsPublishService
+from services.news_service import NewsService
 from tests import TEST_CONFIG_PATH
 
 
@@ -38,21 +42,15 @@ class TestNewsPublishService(TestCase):
         """
         Initialize the publisher service mocking necessary properties
         """
-        self.locker_client_mock = MagicMock()
+        self.locker_client_mock = Mock(spec=Locker)
         self.publisher_mock = publisher_mock
         self.process_mock = process_mock
-        self.news_service_mock = MagicMock()
+        self.news_service_mock = Mock(spec=NewsService)
         self.news_service_mock.consume_new_inserts.return_value = [('test', self.TEST_NEW_INSERT_CHANGE),
                                                                    ('test', self.TEST_NEW_INSERT_CHANGE)]
-        self.apm_mock = MagicMock()
         self.app = Application()
-        self.app['news_service'] = self.news_service_mock
-        self.app['locker_client'] = self.locker_client_mock
-        self.mocked_config = MagicMock()
-        self.mocked_config.get_section.return_value = self.TEST_RABBIT_CONFIG
-        self.app['config'] = self.mocked_config
         self.publisher_mock.test_connection.return_value = True
-        self.news_publish_service = NewsPublishService(self.app)
+        self.news_publish_service = NewsPublishService(self.news_service_mock, self.locker_client_mock)
 
     def test_initialize_publisher(self):
         """
@@ -72,8 +70,8 @@ class TestNewsPublishService(TestCase):
         self.news_publish_service()
         self.publisher_mock().connect.assert_called_once()
         self.publisher_mock().initialize.assert_called_once()
-        self.publisher_mock().assert_called_with(dict(self.TEST_NEW_INSERT_CHANGE))
-        call_calls = self.publisher_mock().mock_calls.count(call(dict(self.TEST_NEW_INSERT_CHANGE)))
+        self.publisher_mock().assert_called_with(asdict(self.TEST_NEW_INSERT_CHANGE))
+        call_calls = self.publisher_mock().mock_calls.count(call(asdict(self.TEST_NEW_INSERT_CHANGE)))
         self.assertEqual(call_calls, 2)
 
     @async_test
