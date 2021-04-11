@@ -32,8 +32,6 @@ rabbit:
   port: 5672
   user: guest
   password: guest
-celery:
-  concurrency: 12
 redis_nlp_worker:
   host: redis
   port: 6379
