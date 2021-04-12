@@ -1,0 +1,8 @@
+name: news-manager
+description: A generated Helm Chart for docker\news-service from Skippbox Kompose
+version: 0.0.1
+apiVersion: v1
+keywords:
+  - news-manager
+sources:
+home:

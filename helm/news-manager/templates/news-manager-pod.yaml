@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: news-manager
+  name: news-manager
+spec:
+  containers:
+  - envFrom:
+      - configMapRef:
+          name: news-manager-configmap
+    image: djrevok/news-manager:latest
+    livenessProbe:
+      exec:
+        command:
+        - curl -f http://localhost:8080/healthcheck
+      failureThreshold: 10
+      periodSeconds: 2
+      timeoutSeconds: 20
+    name: news-manager
+    ports:
+    - containerPort: 8080
+    resources: {}
+  restartPolicy: OnFailure
+status: {}
