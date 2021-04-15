@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongodb-second
+  name: mongodb-second
+spec:
+  ports:
+  - name: "27018"
+    port: 27018
+    targetPort: 27018
+  selector:
+    io.kompose.service: mongodb-second
+status:
+  loadBalancer: {}
