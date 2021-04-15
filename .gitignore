@@ -2,6 +2,9 @@
 *.bak
 *.dat
 *.dir
+**charts**
+*.tgz
+*.lock
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

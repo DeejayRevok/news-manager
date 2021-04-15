@@ -1,10 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe
-      convert -c -f docker\news-service.yml
-    kompose.version: 1.21.0 (992df58d8)
   creationTimestamp: null
   labels:
     io.kompose.service: mongodb-second
@@ -18,10 +14,6 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe
-          convert -c -f docker\news-service.yml
-        kompose.version: 1.21.0 (992df58d8)
       creationTimestamp: null
       labels:
         io.kompose.service: mongodb-second
@@ -34,13 +26,6 @@ spec:
         - nsrs
         image: djrevok/mongo-second-news-service:latest
         imagePullPolicy: ""
-        livenessProbe:
-          exec:
-            command:
-            - echo 'db.runCommand("ping").ok' | mongo mongodb-second:27018 --quiet
-          failureThreshold: 10
-          periodSeconds: 10
-          timeoutSeconds: 10
         name: mongodb-second
         ports:
         - containerPort: 27018

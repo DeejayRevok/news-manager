@@ -3,11 +3,11 @@ Application main module
 """
 from aiohttp.web_app import Application
 from aiohttp_apispec import validation_middleware
-from news_service_lib import HealthCheck, server_runner
-from news_service_lib.graphql import setup_graphql_routes
 
 from config import config, CONFIGS_PATH
 from log_config import get_logger, LOG_CONFIG
+from news_service_lib import HealthCheck, server_runner
+from news_service_lib.graphql import setup_graphql_routes
 from webapp.container_config import container, load
 from webapp.definitions import health_check, API_VERSION
 from webapp.graph import schema
@@ -51,4 +51,5 @@ def init_news_manager(app: Application) -> Application:
 
 
 if __name__ == '__main__':
-    server_runner('News manager', init_news_manager, API_VERSION, CONFIGS_PATH, config, LOG_CONFIG, get_logger)
+    server_runner('News manager', init_news_manager, API_VERSION, CONFIGS_PATH, config, 'NEWS_MANAGER', LOG_CONFIG,
+                  get_logger)
