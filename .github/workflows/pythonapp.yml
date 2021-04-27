@@ -1,6 +1,9 @@
-name: News Manager
+name: News Manager CI
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - master
 
 jobs:
 
