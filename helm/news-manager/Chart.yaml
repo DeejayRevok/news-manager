@@ -1,6 +1,7 @@
 name: news-manager
 description: News manager helm chart
-version: 0.1.0
+version: 0.0.0
+appVersion: latest
 apiVersion: v1
 keywords:
   - news-manager

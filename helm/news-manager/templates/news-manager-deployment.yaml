@@ -22,7 +22,7 @@ spec:
       - envFrom:
           - configMapRef:
               name: news-manager-configmap
-        image: djrevok/news-manager:latest
+        image: 'djrevok/news-manager:{{ .Chart.AppVersion }}'
         name: news-manager
         ports:
         - containerPort: 8080
