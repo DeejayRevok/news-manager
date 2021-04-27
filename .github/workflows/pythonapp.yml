@@ -1,0 +1,50 @@
+name: News Manager CI
+
+on:
+  push:
+    branches-ignore:
+      - master
+
+jobs:
+
+  news-manager-CI:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Lint and check score
+      run: |
+        export PYTHONPATH=`pwd`
+        pylint-fail-under --fail_under 9  --ignore=Dockerfile,README.md,config.ini,requirements.txt ./*
+    - name: Test with unittest
+      run: coverage run --source ./ --branch --omit=*__init__**,**tests** -m unittest discover -v ./tests
+    - name: Check test coverage
+      run: coverage report  --fail-under=80
+    - name: Generate coverage report
+      run: coverage xml -o coverage_news_manager.xml
+    - name: Codecov upload
+      uses: codecov/codecov-action@v1.0.5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: coverage_news_manager.xml
+    - name: Build the docker image
+      run: docker build -t djrevok/news-manager:latest .
+    - name: Login to docker hub
+      if: github.ref == 'refs/heads/develop'
+      uses: actions-hub/docker/login@master
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Publish docker image
+      if: github.ref == 'refs/heads/develop'
+      uses: actions-hub/docker@master
+      with:
+        args: push djrevok/news-manager:latest

@@ -1,0 +1,33 @@
+server:
+  host: 0.0.0.0
+  port: 8080
+  storage: mongo
+  locker: redis
+mongo:
+  members: mongodb-first:27017,mongodb-second:27018
+  rsname: nsrs
+  database: news-service
+elastic_apm:
+  secret_token: xxVpmQB2HMzCL9PgBHVrnxjNXXw5J7bd79DFm6sjBJR5HPXDhcF8MSb3vv4bpg44
+  url: http://apm-server:8200
+logstash:
+  host: logstash
+  port: 5000
+redis:
+  host: redis
+  port: 6379
+  password: n3wsr3d1sp4ss
+uaa:
+  protocol: http
+  host: uaa
+  port: 8081
+rabbit:
+  host: rabbitmq
+  port: 5672
+  user: guest
+  password: guest
+redis_nlp_worker:
+  host: redis
+  port: 6379
+  password: n3wsr3d1sp4ss
+  db: 2

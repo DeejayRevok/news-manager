@@ -1,0 +1,16 @@
+name: news-manager
+description: News manager helm chart
+version: 0.0.0
+appVersion: latest
+apiVersion: v1
+keywords:
+  - news-manager
+sources:
+home:
+dependencies:
+  - name: rabbit
+    version: 0.1.0
+    repository: "https://deejayrevok.github.io/helm-repo"
+  - name: redis
+    version: 0.1.0
+    repository: "https://deejayrevok.github.io/helm-repo"
