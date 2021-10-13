@@ -1,25 +1,13 @@
 from logging import Logger
 
-import functools
 import pymongo
 from pymongo.errors import ServerSelectionTimeoutError
 
-from typing import Any, Callable, List, Iterator
+from typing import List, Iterator
 
 from infrastructure.storage.filter.filter import Filter
 from infrastructure.storage.filter.mongo_filter_parser import MongoFilterParser
 from infrastructure.storage.mongo_sort_direction import MongoSortDirection
-
-
-def check_collection(function: Callable) -> Any:
-    @functools.wraps(function)
-    def managed(*args, **kwargs) -> Any:
-        if args[0].collection is not None:
-            return function(*args, **kwargs)
-        else:
-            raise AttributeError("Collection not set")
-
-    return managed
 
 
 class MongoStorageClient:
@@ -30,6 +18,10 @@ class MongoStorageClient:
         self.__mongo_client = pymongo.MongoClient(members[0], replicaset=rsname, connect=True)
         self.__database = self.__mongo_client[database]
         self.__collection = None
+
+    def __check_collection(self) -> None:
+        if self.__collection is None:
+            raise AttributeError("Collection not set")
 
     def __init_replicaset(self, members: List[str], rsname: str):
         try:
@@ -49,8 +41,8 @@ class MongoStorageClient:
         except ServerSelectionTimeoutError:
             return False
 
-    @check_collection
     def save(self, item: dict):
+        self.__check_collection()
         self.__collection.insert_one(item)
 
     @staticmethod
@@ -62,10 +54,10 @@ class MongoStorageClient:
                 aggregated_query = {**aggregated_query, **query}
         return aggregated_query
 
-    @check_collection
     def get(
         self, filters: List[Filter] = None, sort_key: str = None, sort_direction: MongoSortDirection = None
     ) -> Iterator[dict]:
+        self.__check_collection()
         cursor = self.__collection.find(self.__parse_filters(filters))
 
         if sort_key:
@@ -74,16 +66,16 @@ class MongoStorageClient:
         for item in cursor:
             yield item
 
-    @check_collection
     def get_one(self, filters: List[Filter] = None) -> dict:
+        self.__check_collection()
         return self.__collection.find_one(self.__parse_filters(filters))
 
-    @check_collection
     def delete(self, identifier: str):
+        self.__check_collection()
         self.__collection.remove(identifier)
 
-    @check_collection
     def consume_inserts(self) -> Iterator[dict]:
+        self.__check_collection()
         insert_consumer = self.__collection.watch([{"$match": {"operationType": "insert"}}])
         try:
             for insert_change in insert_consumer:
