@@ -1,90 +1,71 @@
 import asyncio
 import unittest
 from dataclasses import asdict
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
+from infrastructure.storage.filter.range_filter import RangeFilter
+from infrastructure.storage.mongo_sort_direction import MongoSortDirection
+from infrastructure.storage.mongo_storage_client import MongoStorageClient
 from news_service_lib.models.new import New
-from news_service_lib.storage.filter import RangeFilter
-from news_service_lib.storage import SortDirection
 from services.news_service import NewsService
 
-MOCKED_NEW = New(title='Test title', url='https://test.test', content='Test content', source='Test source',
-                 date=10101010.00)
+MOCKED_NEW = New(
+    title="Test title",
+    url="https://test.test",
+    content="Test content",
+    source="Test source",
+    language="test_language",
+    date=10101010.00,
+)
 
 
 class TestNewsService(unittest.TestCase):
-    """
-    News service test cases implementation
-    """
-
-    @patch('news_service_lib.storage.implementation.Storage')
-    def test_save_new(self, client):
-        """
-        Test persisting new
-        """
-        news_service = NewsService(client)
+    def test_save_new(self):
+        storage_client_mock = Mock(spec=MongoStorageClient)
+        storage_client_mock.get_one.return_value = {"_id": "test_id"}
+        news_service = NewsService(storage_client_mock)
 
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.save_new(MOCKED_NEW))
 
-        client.save.assert_called_with(asdict(MOCKED_NEW))
+        storage_client_mock.save.assert_called_with(asdict(MOCKED_NEW))
 
-    @patch('news_service_lib.storage.implementation.Storage')
-    @patch.object(NewsService, '_render_news_list')
-    def test_get_news_empty(self, client, news_service_mocked):
-        """
-        Test find news without filter
-        """
-        news_service = NewsService(client)
-        news_service._render_news_list = news_service_mocked._render_news_list
+    def test_get_news_empty(self):
+        storage_client_mock = Mock(spec=MongoStorageClient)
+        news_service = NewsService(storage_client_mock)
 
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.get_news_filtered())
 
-        client.get.assert_called()
+        storage_client_mock.get.assert_called()
 
-    @patch('news_service_lib.storage.implementation.Storage')
-    @patch.object(NewsService, '_render_news_list')
-    def test_get_news_date_range(self, client, news_service_mocked):
-        """
-        Test find news with range filter
-        """
-        news_service = NewsService(client)
-        news_service._render_news_list = news_service_mocked._render_news_list
+    def test_get_news_date_range(self):
+        storage_client_mock = Mock(spec=MongoStorageClient)
+        news_service = NewsService(storage_client_mock)
         start = 1
         end = 2
 
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.get_news_filtered(from_date=start, to_date=end))
 
-        client.get.assert_called_with([RangeFilter('date', upper=end, lower=start)],
-                                      sort_key="date",
-                                      sort_direction=SortDirection.DESC)
+        storage_client_mock.get.assert_called_with(
+            [RangeFilter("date", upper=end, lower=start)], sort_key="date", sort_direction=MongoSortDirection.DESC
+        )
 
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.get_news_filtered(from_date=start))
 
-        client.get.assert_called_with([RangeFilter('date', upper=None, lower=start)],
-                                      sort_key="date",
-                                      sort_direction=SortDirection.DESC)
+        storage_client_mock.get.assert_called_with(
+            [RangeFilter("date", upper=None, lower=start)], sort_key="date", sort_direction=MongoSortDirection.DESC
+        )
 
         loop = asyncio.new_event_loop()
         loop.run_until_complete(news_service.get_news_filtered(to_date=end))
 
-        client.get.assert_called_with([RangeFilter('date', upper=end, lower=None)],
-                                      sort_key="date",
-                                      sort_direction=SortDirection.DESC)
-
-    def test_render_news(self):
-        """
-        Test news rendering
-        """
-
-        rendered_new = next(NewsService._render_news_list([asdict(MOCKED_NEW)]), None)
-
-        self.assertIsNotNone(rendered_new)
-        self.assertIsInstance(rendered_new, New)
+        storage_client_mock.get.assert_called_with(
+            [RangeFilter("date", upper=end, lower=None)], sort_key="date", sort_direction=MongoSortDirection.DESC
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
