@@ -1,6 +1,3 @@
-"""
-Application configuration module
-"""
 from os.path import join, dirname
 
 from dynaconf.base import Settings

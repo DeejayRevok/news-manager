@@ -1,6 +1,3 @@
-"""
-Logging configuration
-"""
 from logging import config as logging_config, getLogger
 from logging import Logger
 from os.path import join, dirname
@@ -12,8 +9,5 @@ LOG_CONFIG = get_base_log_config(LOG_FILE)
 
 
 def get_logger() -> Logger:
-    """
-    Get logger with the configuration specified above
-    """
     logging_config.dictConfig(LOG_CONFIG)
     return getLogger('main_logger')
