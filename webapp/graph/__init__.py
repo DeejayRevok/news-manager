@@ -1,6 +1,3 @@
-"""
-GraphQL initialization module
-"""
 from graphene import Schema
 
 from webapp.graph.queries import Query

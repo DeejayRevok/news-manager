@@ -1,14 +1,11 @@
-git+http://github.com/DeejayRevok/news-service-lib.git@0.1.0
-pymongo
+git+http://github.com/DeejayRevok/news-service-lib.git@3.0.0
+pymongo==3.10.1
 multidict==4.6.1
 yarl==1.3.0
 aiohttp==3.7.4
 graphene
-mongomock==3.19.0
 requests==2.23.0
 xmltodict==0.12.0
-pylint-fail-under==0.3.0
-coverage==5.0.3
 psutil==5.7.0
 python-logstash==0.4.6
 bs4==0.0.1
@@ -19,4 +16,3 @@ dynaconf
 elastic-apm==6.0.0
 pypendency==0.1.0
 dacite==1.6.0
-asyncmock==0.4.2
