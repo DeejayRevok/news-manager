@@ -25,8 +25,8 @@ async def shutdown(_):
 
 def init_news_manager() -> Application:
     app = Application()
-    args = server_args_parser("UAA")
-    loaded_config = load_config(args["configuration"], config, "UAA")
+    args = server_args_parser("News manager")
+    loaded_config = load_config(args["configuration"], config, "NEWS_MANAGER")
     add_logstash_handler(LOG_CONFIG, config.logstash.host, config.logstash.port)
     load()
 
