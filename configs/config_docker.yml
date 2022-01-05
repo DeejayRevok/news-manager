@@ -3,6 +3,7 @@ server:
   port: 8080
   storage: mongo
   locker: redis
+  base_path:
 mongo:
   members: mongodb-first:27017,mongodb-second:27018
   rsname: nsrs
