@@ -4,7 +4,6 @@ from pypendency.definition import Definition
 from news_service_lib.configurable_container import ConfigurableContainer
 
 from config import config
-from log_config import get_logger
 
 
 container: ConfigurableContainer = ConfigurableContainer([], config)
@@ -31,7 +30,6 @@ def load():
                 Argument.no_kw_argument("#mongo.members"),
                 Argument.no_kw_argument("#mongo.rsname"),
                 Argument.no_kw_argument("#mongo.database"),
-                Argument.no_kw_argument(get_logger()),
             ],
         )
     )
