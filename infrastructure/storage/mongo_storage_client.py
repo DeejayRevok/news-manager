@@ -1,5 +1,3 @@
-from logging import Logger
-
 import pymongo
 from pymongo.errors import ServerSelectionTimeoutError
 
@@ -11,28 +9,14 @@ from infrastructure.storage.mongo_sort_direction import MongoSortDirection
 
 
 class MongoStorageClient:
-    def __init__(self, members: str, rsname: str, database: str, logger: Logger):
-        members = members.split(",")
-        self.__logger = logger
-        self.__init_replicaset(members, rsname)
-        self.__mongo_client = pymongo.MongoClient(members[0], replicaset=rsname, connect=True)
+    def __init__(self, members: str, rsname: str, database: str):
+        self.__mongo_client = pymongo.MongoClient(members, replicaset=rsname, connect=True)
         self.__database = self.__mongo_client[database]
         self.__collection = None
 
     def __check_collection(self) -> None:
         if self.__collection is None:
             raise AttributeError("Collection not set")
-
-    def __init_replicaset(self, members: List[str], rsname: str):
-        try:
-            first_host = members[0].split(":")[0]
-            first_port = int(members[0].split(":")[1])
-            mongo_admin_client = pymongo.MongoClient(first_host, first_port, connect=True)
-            rs_config = {"_id": rsname, "members": [{"_id": 0, "host": members[0]}, {"_id": 1, "host": members[1]}]}
-            mongo_admin_client.admin.command("replSetInitiate", rs_config)
-            mongo_admin_client.close()
-        except Exception as ex:
-            self.__logger.info("Replicaset already initialized %s", str(ex))
 
     def health_check(self) -> bool:
         try:
