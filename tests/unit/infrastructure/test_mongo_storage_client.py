@@ -1,12 +1,10 @@
 import unittest
-from logging import getLogger
 
 import mongomock
 
 from infrastructure.storage.filter.match_filter import MatchFilter
 from infrastructure.storage.mongo_storage_client import MongoStorageClient
 
-LOGGER = getLogger()
 MOCKED_ITEM = {"id": 1, "test": "test"}
 MOCKED_ITEM_UPDATE = {"id": 1, "test": "test2"}
 
@@ -20,13 +18,13 @@ class TestMongoStorage(unittest.TestCase):
 
     @mongomock.patch(servers=((MONGO_HOST, MONGO_PORT),))
     def test_collection_not_set(self):
-        mongo_client = MongoStorageClient(self.MONGO_MEMBER, "test", self.DATABASE, LOGGER)
+        mongo_client = MongoStorageClient(self.MONGO_MEMBER, "test", self.DATABASE)
         with self.assertRaises(AttributeError):
             mongo_client.save(MOCKED_ITEM)
 
     @mongomock.patch(servers=((MONGO_HOST, MONGO_PORT),))
     def test_save(self):
-        mongo_client = MongoStorageClient(self.MONGO_MEMBER, "test", self.DATABASE, LOGGER)
+        mongo_client = MongoStorageClient(self.MONGO_MEMBER, "test", self.DATABASE)
         mongo_client.set_collection(self.COLLECTION)
         mongo_client.save(MOCKED_ITEM)
         stored_item = mongo_client.get_one()
@@ -35,7 +33,7 @@ class TestMongoStorage(unittest.TestCase):
 
     @mongomock.patch(servers=((MONGO_HOST, MONGO_PORT),))
     def test_get_one(self):
-        mongo_client = MongoStorageClient(self.MONGO_MEMBER, "test", self.DATABASE, LOGGER)
+        mongo_client = MongoStorageClient(self.MONGO_MEMBER, "test", self.DATABASE)
         mongo_client.set_collection(self.COLLECTION)
         mongo_client.save(MOCKED_ITEM)
         mongo_client.save(MOCKED_ITEM_UPDATE)
@@ -48,7 +46,7 @@ class TestMongoStorage(unittest.TestCase):
 
     @mongomock.patch(servers=((MONGO_HOST, MONGO_PORT),))
     def test_get(self):
-        mongo_client = MongoStorageClient(self.MONGO_MEMBER, "test", self.DATABASE, LOGGER)
+        mongo_client = MongoStorageClient(self.MONGO_MEMBER, "test", self.DATABASE)
         mongo_client.set_collection(self.COLLECTION)
         mongo_client.save(MOCKED_ITEM)
         mongo_client.save(MOCKED_ITEM_UPDATE)
@@ -62,7 +60,7 @@ class TestMongoStorage(unittest.TestCase):
 
     @mongomock.patch(servers=((MONGO_HOST, MONGO_PORT),))
     def test_delete(self):
-        mongo_client = MongoStorageClient(self.MONGO_MEMBER, "test", self.DATABASE, LOGGER)
+        mongo_client = MongoStorageClient(self.MONGO_MEMBER, "test", self.DATABASE)
         mongo_client.set_collection(self.COLLECTION)
         mongo_client.save(MOCKED_ITEM)
 
