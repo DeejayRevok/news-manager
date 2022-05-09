@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "mongodb-init-replicaset"
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: post-install-job
+        image: "mvertes/alpine-mongo"
+        command:
+        - mongo
+        - '--host'
+        - mongodb-first
+        - '--eval'
+        - >-
+          rs.initiate({_id: "nsrs", version: 1, members: [{ _id: 0,
+          host : "mongodb-first:27017" },{ _id: 1, host :
+          "mongodb-second:27018" },]})
