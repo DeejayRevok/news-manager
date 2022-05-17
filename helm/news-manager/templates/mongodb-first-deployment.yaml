@@ -31,6 +31,10 @@ spec:
         volumeMounts:
         - mountPath: /data/db
           name: mongodb-news-first-data
+      hostAliases:
+        - ip: 127.0.0.1
+          hostnames:
+            - mongodb-first
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
