@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-manager-get-new-query-handler
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    spec:
+      containers:
+      - envFrom:
+          - configMapRef:
+              name: news-manager-configmap
+        image: 'djrevok/news-manager:{{ .Chart.AppVersion }}'
+        name: news-manager-get-new-query-handler
+        ports:
+        - containerPort: 10000
+        resources: {}
+        command:
+          - make
+          - run_rpyc_query_engine
+          - QUERY_NAME=query.news_manager.get_new
+      restartPolicy: Always
+      serviceAccountName: ""
+status: {}

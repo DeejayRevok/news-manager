@@ -5,14 +5,8 @@ News service news manager microservice
 [![codecov](https://codecov.io/gh/DeejayRevok/news-manager/branch/develop/graph/badge.svg?token=AOD98UF75k)](https://codecov.io/gh/DeejayRevok/news-manager)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DeejayRevok_news-manager&metric=alert_status)](https://sonarcloud.io/dashboard?id=DeejayRevok_news-manager)
 
-#### Local running
+#### Running
 
-Run the parent's repo dev docker compose.
+Create a .env file (You can use the .env.example as template)
 
-Inside the application folder run:
-```
-export JWT_SECRET={JWT_TOKEN_SECRET}
-export PYTHONPATH={FULL_PATH_TO_APPLICATION_FOLDER}
-pip install -r requirements-prod.txt
-python webapp/main.py -c ./configs/config_local.yml
-```
+Run the docker stack using docker-compose.

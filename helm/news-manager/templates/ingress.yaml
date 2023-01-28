@@ -9,10 +9,10 @@ spec:
   rules:
     - http:
         paths:
-        - path: /manager/?(.*)
+        - path: /news-manager/?(.*)
           pathType: Prefix
           backend:
             service:
-              name: news-manager
+              name: news-manager-web-server
               port:
                 number: 8080
