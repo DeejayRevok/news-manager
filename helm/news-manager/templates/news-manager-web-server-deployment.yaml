@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-manager-web-server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    spec:
+      containers:
+      - envFrom:
+          - configMapRef:
+              name: news-manager-configmap
+        image: 'djrevok/news-manager:{{ .Chart.AppVersion }}'
+        name: news-manager-web-server
+        ports:
+        - containerPort: 8080
+        resources: {}
+        command:
+          - make
+          - run_web_server
+      restartPolicy: Always
+      serviceAccountName: ""
+status: {}

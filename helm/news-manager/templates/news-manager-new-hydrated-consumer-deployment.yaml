@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-manager-new-hydrated-consumer
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    spec:
+      containers:
+      - envFrom:
+          - configMapRef:
+              name: news-manager-configmap
+        image: 'djrevok/news-manager:{{ .Chart.AppVersion }}'
+        name: news-manager-new-hydrated-consumer
+        resources: {}
+        command:
+          - make
+          - run_kombu_event_consumer
+          - EVENT_NAME=event.new_hydrated
+          - CONSUMER_NAME=event_consumer.news_manager.save_new.new_hydrated
+      restartPolicy: Always
+      serviceAccountName: ""
+status: {}
