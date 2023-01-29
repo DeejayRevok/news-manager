@@ -1,0 +1,1 @@
+News manager umbrella chart

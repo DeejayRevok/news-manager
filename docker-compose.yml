@@ -20,7 +20,7 @@ services:
   mongo:
     image: mongo:6.0.2
     volumes:
-      - 'mongo_data:/data/db'
+      - 'news_manager_mongo_data:/data/db'
     ports:
       - "27017:27017"
 
@@ -100,6 +100,6 @@ services:
       BASE_URL: /swagger
 
 volumes:
-  mongo_data:
+  news_manager_mongo_data:
   elasticsearch_data:
   redis_data:

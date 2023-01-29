@@ -6,7 +6,8 @@ News service news manager microservice
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DeejayRevok_news-manager&metric=alert_status)](https://sonarcloud.io/dashboard?id=DeejayRevok_news-manager)
 
 #### Running
-
-Create a .env file (You can use the .env.example as template)
-
-Run the docker stack using docker-compose.
+Inside the application folder run:
+```
+cp .env.example .env
+docker-compose up -d
+```
