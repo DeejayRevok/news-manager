@@ -1,5 +1,6 @@
 import os
 
+from bus_station.query_terminal.registry.redis_query_registry import RedisQueryRegistry
 from pypendency.builder import container_builder
 
 
@@ -19,14 +20,17 @@ def register() -> None:
     redis_registry = container_builder.get(
         "bus_station.query_terminal.registry.redis_query_registry.RedisQueryRegistry",
     )
-    rpyc_query_bus_exposed_host_address = os.environ.get("NEWS_MANAGER_RPYC_QUERY_BUS_EXPOSED_HOST_ADDRESS")
-    rpyc_query_bus_port = int(os.environ.get("NEWS_MANAGER_RPYC_QUERY_BUS_STARTING_PORT"))
-    rpyc_handlers_fqns = [
-        "application.get_new.get_new_query_handler.GetNewQueryHandler"
-    ]
-    for rpyc_handler_fqn in rpyc_handlers_fqns:
-        handler = container_builder.get(
-            rpyc_handler_fqn
+    
+    __register_rpyc_query_handler(
+        registry=redis_registry,
+        query_handler_fqn="application.get_new.get_new_query_handler.GetNewQueryHandler",
+        query_handler_host=os.environ.get("NEWS_MANAGER_RPYC_GET_NEW_HOST"),
+        query_handler_port=int(os.environ.get("NEWS_MANAGER_RPYC_GET_NEW_PORT"))
+    )
+
+
+def __register_rpyc_query_handler(registry: RedisQueryRegistry, query_handler_fqn: str, query_handler_host: str, query_handler_port: int) -> None:
+    handler = container_builder.get(
+            query_handler_fqn
         )
-        redis_registry.register(handler, f"{rpyc_query_bus_exposed_host_address}:{rpyc_query_bus_port}")
-        rpyc_query_bus_port += 1
+    registry.register(handler, f"{query_handler_host}:{query_handler_port}")

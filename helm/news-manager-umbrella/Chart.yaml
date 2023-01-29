@@ -1,0 +1,22 @@
+name: news-manager-umbrella
+description: News manager umbrella helm chart
+version: 0.0.0
+appVersion: latest
+apiVersion: v1
+keywords:
+  - news-manager
+sources:
+home:
+dependencies:
+  - name: news-manager
+    version: 0.0.0
+    repository: "file://../news-manager"
+  - name: redis
+    version: 17.4.3
+    repository: "https://charts.bitnami.com/bitnami"
+  - name: rabbitmq
+    version: 11.4.0
+    repository: "https://charts.bitnami.com/bitnami"
+  - name: monitor
+    version: 1.0.2
+    repository: "https://deejayrevok.github.io/helm-repo"
