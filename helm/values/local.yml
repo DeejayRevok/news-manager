@@ -1,23 +1,74 @@
-global:
+news-manager:
   NEWS_MANAGER_SERVER__HOST: 0.0.0.0
   NEWS_MANAGER_SERVER__PORT: 8080
-  NEWS_MANAGER_SERVER__BASE_PATH: /news-manager
 
-  NEWS_MANAGER_MONGO__HOST: mongo
+  NEWS_MANAGER_MONGO__HOST: news-manager-mongo
   NEWS_MANAGER_MONGO__PORT: 27017
   NEWS_MANAGER_MONGO__DATABASE: news-manager
 
   NEWS_MANAGER_ELASTIC_APM__SECRET_TOKEN: xxVpmQB2HMzCL9PgBHVrnxjNXXw5J7bd79DFm6sjBJR5HPXDhcF8MSb3vv4bpg44
-  NEWS_MANAGER_ELASTIC_APM__URL: http://apm-server:8200
+  NEWS_MANAGER_ELASTIC_APM__URL: http://monitor-apm-server:8200
 
-  NEWS_MANAGER_REDIS__HOST: redis
+  NEWS_MANAGER_REDIS__HOST: redis-master
   NEWS_MANAGER_REDIS__PORT: 6379
-  NEWS_MANAGER_REDIS__PASSWORD:
+  NEWS_MANAGER_REDIS__PASSWORD: test_password
 
   NEWS_MANAGER_RABBIT__HOST: rabbitmq
   NEWS_MANAGER_RABBIT__PORT: 5672
   NEWS_MANAGER_RABBIT__PASSWORD: test_password
   NEWS_MANAGER_RABBIT__USER: test_user
 
-  NEWS_MANAGER_RPYC_QUERY_BUS_EXPOSED_HOST_ADDRESS: news-manager
-  NEWS_MANAGER_RPYC_QUERY_BUS_STARTING_PORT: 10000
+  NEWS_MANAGER_RPYC_GET_NEW_HOST: news-manager-get-new
+  NEWS_MANAGER_RPYC_GET_NEW_PORT: 10000
+
+  NEWS_MANAGER_ELASTICSEARCH_HOSTS: monitor-elasticsearch:9200
+  NEWS_MANAGER_LOGSTASH_HOSTS: monitor-logstash:5044
+  NEWS_MANAGER_KIBANA_HOST: monitor-kibana:5601
+
+rabbitmq:
+  fullnameOverride: rabbitmq
+  auth:
+    username: test_user
+    password: test_password
+
+redis:
+  fullnameOverride: redis
+  auth:
+    password: test_password
+
+monitor:
+  APM_SERVER_HOST: 0.0.0.0:8200
+  APM_SERVER_SECRET_TOKEN: xxVpmQB2HMzCL9PgBHVrnxjNXXw5J7bd79DFm6sjBJR5HPXDhcF8MSb3vv4bpg44
+  APM_SERVER_LOGGING_TO_FILES: false
+  APM_SERVER_SETUP_KIBANA_HOST: monitor-kibana:5601
+  APM_SERVER_SETUP_TEMPLATE_ENABLED: true
+  APM_SERVER_ELASTICSEARCH_HOSTS: http://monitor-elasticsearch:9200
+
+  ELASTICSEARCH_ES_JAVA_OPTS: -Xms512m -Xmx512m
+  ELASTICSEARCH_JAVA_TOOL_OPTIONS: -Xms512m -Xmx512m
+  ELASTICSEARCH_DISCOVERY_TYPE: single-node
+
+  KIBANA_SERVER_BASEPATH: /monitor/kibana
+  KIBANA_ELASTICSEARCH_HOSTS: http://monitor-elasticsearch:9200
+
+  LOGSTASH_PIPELINE_WORKERS: 2
+  LOGSTASH_XPACK_MONITORING_ELASTICSEARCH_HOSTS: http://monitor-elasticsearch:9200
+  LOGSTASH_CONFIG_STRING: |
+    input {
+      beats {
+        port => 5044
+      }
+    }
+
+    filter {
+      json {
+        source => "message"
+      }
+    }
+
+    output {
+      elasticsearch {
+        hosts => ["http://monitor-elasticsearch:9200"]
+        index => "%{[@metadata][beat]}-%{[@metadata][version]}"
+      }
+    }
