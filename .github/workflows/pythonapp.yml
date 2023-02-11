@@ -12,30 +12,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.8
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements-dev.txt
-        pip install -r requirements-prod.txt
+    - name: Setup env
+      run: cp .env.example .env
     - name: Check formatting
-      run: tox -e black -- --check
+      run: docker-compose run news-manager tox -e black -- --check
     - name: Check style
-      run: tox -e flake8
+      run: docker-compose run news-manager tox -e flake8
     - name: Test with unittest
-      run: tox -e tests
-    - name: Check test coverage
-      run: tox -e coverage_check
+      run: docker-compose run news-manager tox -e tests
     - name: Generate coverage report
-      run: tox -e coverage_report
-    - name: Codecov upload
-      uses: codecov/codecov-action@v1.0.5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: coverage_news_manager.xml
+      run: docker-compose run news-manager tox -e coverage_report
     - name: Build the docker image
       run: docker build -t djrevok/news-manager:latest .
     - name: Login to docker hub
