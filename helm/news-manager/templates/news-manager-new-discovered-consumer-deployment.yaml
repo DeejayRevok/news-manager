@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: news-manager-new-discovered-consumer
+  name: news-manager-new-discovered-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: news-manager-new-discovered-consumer
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: news-manager-new-discovered-consumer
+    spec:
+      containers:
+      - envFrom:
+          - configMapRef:
+              name: news-manager-configmap
+        image: 'djrevok/news-manager:{{ .Chart.AppVersion }}'
+        name: news-manager-new-discovered-consumer
+        resources: {}
+        command:
+          - make
+          - run_kombu_event_consumer
+          - EVENT_NAME=event.new_discovered
+          - CONSUMER_NAME=event_consumer.news_manager.save_new.new_discovered
+      restartPolicy: Always
+      serviceAccountName: ""
+status: {}
