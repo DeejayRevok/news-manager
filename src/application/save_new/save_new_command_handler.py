@@ -18,12 +18,8 @@ class SaveNewCommandHandler(CommandHandler):
     def handle(self, command: SaveNewCommand) -> None:
         self.__logger.info("Starting saving new")
 
-        self.__new_repository.save(
-            self.__create_new_from_command(command)
-        )
-        self.__event_bus.transport(
-            self.__create_event_from_command(command)
-        )
+        self.__new_repository.save(self.__create_new_from_command(command))
+        self.__event_bus.transport(self.__create_event_from_command(command))
 
         self.__logger.info("Finished saving new")
 
@@ -39,7 +35,7 @@ class SaveNewCommandHandler(CommandHandler):
             entities=command.entities,
             summary=command.summary,
             sentiment=command.sentiment,
-            image=command.image
+            image=command.image,
         )
 
     def __create_event_from_command(self, command: SaveNewCommand) -> NewSavedEvent:
@@ -54,7 +50,7 @@ class SaveNewCommandHandler(CommandHandler):
             entities=command.entities,
             summary=command.summary,
             sentiment=command.sentiment,
-            image=command.image
+            image=command.image,
         )
 
     @classmethod

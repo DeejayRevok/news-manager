@@ -14,4 +14,5 @@ class LogMiddleware:
             response: Response = await handler(request)
             self.__logger.info(f"Executed HTTP request to {request.url} with response status {response.status}")
             return response
+
         return middleware_handler

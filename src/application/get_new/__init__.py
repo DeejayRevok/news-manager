@@ -10,7 +10,7 @@ def load() -> None:
             "application.get_new.get_new_query_handler.GetNewQueryHandler",
             [
                 Argument.no_kw_argument("@infrastructure.mongo.mongo_new_repository.MongoNewRepository"),
-                Argument.no_kw_argument("@logging.Logger")
-            ]
+                Argument.no_kw_argument("@logging.Logger"),
+            ],
         )
     )

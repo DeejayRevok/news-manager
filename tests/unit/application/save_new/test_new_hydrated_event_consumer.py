@@ -11,9 +11,7 @@ from domain.new.new_hydrated_event import NewHydratedEvent
 class TestNewHydratedEventConsumer(TestCase):
     def setUp(self) -> None:
         self.command_bus_mock = Mock(spec=CommandBus)
-        self.event_consumer = NewHydratedEventConsumer(
-            self.command_bus_mock
-        )
+        self.event_consumer = NewHydratedEventConsumer(self.command_bus_mock)
 
     def test_consume_success(self):
         test_event = NewHydratedEvent(
@@ -23,7 +21,7 @@ class TestNewHydratedEventConsumer(TestCase):
             source="test_source",
             date=123123.45,
             language="test_language",
-            image="test_image"
+            image="test_image",
         )
 
         self.event_consumer.consume(test_event)
@@ -40,6 +38,6 @@ class TestNewHydratedEventConsumer(TestCase):
                 hydrated=False,
                 entities=[],
                 sentiment=None,
-                summary=None
+                summary=None,
             )
         )

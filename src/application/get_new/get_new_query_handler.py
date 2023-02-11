@@ -21,9 +21,7 @@ class GetNewQueryHandler(QueryHandler):
             raise NewNotFoundException(query.title)
 
         self.__logger.info(f"Finish getting new with title {query.title}")
-        return QueryResponse(
-            data=new
-        )
+        return QueryResponse(data=new)
 
     @classmethod
     def bus_stop_name(cls) -> str:
