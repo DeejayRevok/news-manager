@@ -12,7 +12,6 @@ from application.get_news.get_news_query import GetNewsQuery
 
 
 class GetNewsController:
-
     def __init__(self, query_bus: QueryBus, logger: Logger):
         self.__query_bus = query_bus
         self.__logger = logger
@@ -59,10 +58,7 @@ class GetNewsController:
             except Exception as ex:
                 raise HTTPBadRequest(text=str(ex))
 
-            query = GetNewsQuery(
-                from_date=start_date,
-                to_date=end_date
-            )
+            query = GetNewsQuery(from_date=start_date, to_date=end_date)
             try:
                 query_result = self.__query_bus.transport(query)
             except Exception as ex:

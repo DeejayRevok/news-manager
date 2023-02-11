@@ -10,7 +10,7 @@ def load() -> None:
             "application.get_news.get_news_query_handler.GetNewsQueryHandler",
             [
                 Argument.no_kw_argument("@infrastructure.mongo.mongo_new_repository.MongoNewRepository"),
-                Argument.no_kw_argument("@logging.Logger")
-            ]
+                Argument.no_kw_argument("@logging.Logger"),
+            ],
         )
     )

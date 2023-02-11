@@ -8,7 +8,6 @@ from aiohttp.web_response import json_response, Response
 
 
 class ErrorMiddleware:
-
     def __init__(self, logger: Logger):
         self.__logger = logger
 
@@ -25,4 +24,5 @@ class ErrorMiddleware:
                 return json_response(
                     data=dict(error=ex.__class__.__name__, detail=str(ex)), status=HTTPStatus.INTERNAL_SERVER_ERROR
                 )
+
         return middleware_handler

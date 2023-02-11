@@ -13,9 +13,5 @@ def load() -> None:
         port=mongo_port,
     )
     mongo_db = mongo_client[mongo_database]
-    container_builder.set(
-        "pymongo.MongoClient", mongo_client
-    )
-    container_builder.set(
-        "pymongo.database.Database", mongo_db
-    )
+    container_builder.set("pymongo.MongoClient", mongo_client)
+    container_builder.set("pymongo.database.Database", mongo_db)

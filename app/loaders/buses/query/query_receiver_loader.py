@@ -9,4 +9,3 @@ def load() -> None:
             "bus_station.query_terminal.middleware.query_middleware_receiver.QueryMiddlewareReceiver",
         )
     )
-
