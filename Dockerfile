@@ -1,11 +1,10 @@
-FROM python:3.8-slim
-COPY ./ /app/news_manager
+FROM python:3.10-slim
+COPY ./ /app
 
 WORKDIR /app
 
 RUN apt-get update
 RUN apt-get -y install gcc
-RUN apt-get install -y default-libmysqlclient-dev
 RUN apt-get install wget -y
 RUN apt-get install gnupg -y
 RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
@@ -14,11 +13,18 @@ RUN echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | tee -
 RUN apt-get update
 RUN apt-get install git -y
 RUN apt-get install metricbeat=7.11.2
+RUN apt-get install filebeat
+RUN apt-get install make
 
 RUN pip install --upgrade pip
-RUN pip install -r ./news_manager/requirements-prod.txt
+RUN pip install -r ./requirements-prod.txt
+RUN pip install -r ./requirements-dev.txt
 
+RUN mkdir /var/log/news-manager
+
+COPY ./tools_config/filebeat.yml /etc/filebeat/filebeat.yml
 COPY ./tools_config/metricbeat.yml /etc/metricbeat/metricbeat.yml
 
+ENV PYTHONPATH=${PYTHONPATH}:/app/app:/app/src
 EXPOSE 8080
-CMD service metricbeat start && export PYTHONPATH=${PYTHONPATH}:/app/news_manager && python ./news_manager/webapp/main.py -c ./news_manager/configs/config_docker.yml
+CMD make run_web_server
