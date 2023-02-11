@@ -7,11 +7,7 @@ from domain.new.new_repository import NewRepository
 
 
 class NewDiscoveredEventConsumer(EventConsumer):
-    def __init__(
-            self,
-            new_repository: NewRepository,
-            command_bus: CommandBus
-    ):
+    def __init__(self, new_repository: NewRepository, command_bus: CommandBus):
         self.__new_repository = new_repository
         self.__command_bus = command_bus
 
@@ -20,9 +16,7 @@ class NewDiscoveredEventConsumer(EventConsumer):
         if existing_new is not None:
             return
 
-        self.__command_bus.transport(
-            self.__create_command_from_event(event)
-        )
+        self.__command_bus.transport(self.__create_command_from_event(event))
 
     def __create_command_from_event(self, event: NewDiscoveredEvent) -> SaveNewCommand:
         return SaveNewCommand(
@@ -36,7 +30,7 @@ class NewDiscoveredEventConsumer(EventConsumer):
             entities=[],
             summary=None,
             sentiment=None,
-            image=event.image
+            image=event.image,
         )
 
     @classmethod

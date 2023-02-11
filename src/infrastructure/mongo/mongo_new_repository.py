@@ -16,11 +16,7 @@ class MongoNewRepository(NewRepository):
         self.__collection = mongo_db[self.__COLLECTION_NAME]
 
     def save(self, new: New) -> None:
-        self.__collection.replace_one(
-            filter={"title": new.title},
-            replacement=asdict(new),
-            upsert=True
-        )
+        self.__collection.replace_one(filter={"title": new.title}, replacement=asdict(new), upsert=True)
 
     def find_by_title(self, title: str) -> Optional[New]:
         result = self.__collection.find_one({"title": title})

@@ -14,10 +14,7 @@ class TestGetNewsQueryHandler(TestCase):
     def setUp(self) -> None:
         self.new_repository_mock = Mock(spec=NewRepository)
         self.logger = Mock(spec=Logger)
-        self.query_handler = GetNewsQueryHandler(
-            self.new_repository_mock,
-            self.logger
-        )
+        self.query_handler = GetNewsQueryHandler(self.new_repository_mock, self.logger)
 
     def test_handle_success(self):
         test_query = GetNewsQuery(
@@ -35,7 +32,7 @@ class TestGetNewsQueryHandler(TestCase):
             source="test_source",
             date=2341231.23,
             language="test_language",
-            hydrated=True
+            hydrated=True,
         )
         self.new_repository_mock.find_by_criteria.return_value = [test_new, test_new]
 

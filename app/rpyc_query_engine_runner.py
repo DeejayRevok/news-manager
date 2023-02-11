@@ -1,9 +1,6 @@
-import importlib
 from argparse import ArgumentParser
-from typing import Type
 
 from bus_station.query_terminal.bus_engine.rpyc_query_bus_engine import RPyCQueryBusEngine
-from bus_station.query_terminal.query import Query
 from bus_station.query_terminal.registry.redis_query_registry import RedisQueryRegistry
 from bus_station.query_terminal.rpyc_query_server import RPyCQueryServer
 from bus_station.shared_terminal.engine.runner.self_process_engine_runner import SelfProcessEngineRunner
@@ -15,7 +12,9 @@ from app.loaders import load_app
 def run() -> None:
     load_app()
     args = __load_args()
-    query_registry = container_builder.get("bus_station.query_terminal.registry.redis_query_registry.RedisQueryRegistry")
+    query_registry = container_builder.get(
+        "bus_station.query_terminal.registry.redis_query_registry.RedisQueryRegistry"
+    )
     query_name = args["query"]
     query_port = __get_query_registered_port(query_name, query_registry)
     rpyc_server = RPyCQueryServer(
@@ -29,14 +28,11 @@ def run() -> None:
         ),
         query_response_serializer=container_builder.get(
             "bus_station.query_terminal.serialization.query_response_json_serializer.QueryResponseJSONSerializer"
-        )
+        ),
     )
-    engine = RPyCQueryBusEngine(
-        rpyc_server,
-        query_registry,
-        query_name
-    )
+    engine = RPyCQueryBusEngine(rpyc_server, query_registry, query_name)
     SelfProcessEngineRunner(engine).run()
+
 
 def __load_args() -> dict:
     arg_solver = ArgumentParser(description="RPyC query engine runner")

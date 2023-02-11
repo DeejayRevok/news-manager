@@ -5,7 +5,6 @@ from graphene import Scalar, Node
 
 
 class CustomDateTime(Scalar):
-
     @staticmethod
     def serialize(dt: Any) -> str:
         if not isinstance(dt, str):

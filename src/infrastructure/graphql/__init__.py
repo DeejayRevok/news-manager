@@ -7,4 +7,3 @@ from infrastructure.graphql.queries import Query
 def load() -> None:
     schema = Schema(query=Query)
     container_builder.set("graphene.Schema", schema)
-

@@ -14,10 +14,7 @@ class TestNewDiscoveredEventConsumer(TestCase):
     def setUp(self) -> None:
         self.new_repository_mock = Mock(spec=NewRepository)
         self.command_bus_mock = Mock(spec=CommandBus)
-        self.event_consumer = NewDiscoveredEventConsumer(
-            self.new_repository_mock,
-            self.command_bus_mock
-        )
+        self.event_consumer = NewDiscoveredEventConsumer(self.new_repository_mock, self.command_bus_mock)
 
     def test_consume_existing_new(self):
         test_new = New(
@@ -27,7 +24,7 @@ class TestNewDiscoveredEventConsumer(TestCase):
             source="test_source",
             date=2341231.23,
             language="test_language",
-            hydrated=True
+            hydrated=True,
         )
         test_event = NewDiscoveredEvent(
             title="test_new",
@@ -36,7 +33,7 @@ class TestNewDiscoveredEventConsumer(TestCase):
             source="test_source",
             date=123123.45,
             language="test_language",
-            image="test_image"
+            image="test_image",
         )
         self.new_repository_mock.find_by_title.return_value = test_new
 
@@ -53,7 +50,7 @@ class TestNewDiscoveredEventConsumer(TestCase):
             source="test_source",
             date=123123.45,
             language="test_language",
-            image="test_image"
+            image="test_image",
         )
         self.new_repository_mock.find_by_title.return_value = None
 
@@ -72,6 +69,6 @@ class TestNewDiscoveredEventConsumer(TestCase):
                 hydrated=False,
                 entities=[],
                 sentiment=None,
-                summary=None
-        )
+                summary=None,
+            )
         )

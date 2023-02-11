@@ -41,7 +41,7 @@ class NewsQuery(ObjectType):
             from_date=from_date.isoformat() if from_date is not None else None,
             to_date=to_date.isoformat() if to_date is not None else None,
             from_sentiment=from_sentiment,
-            to_sentiment=to_sentiment
+            to_sentiment=to_sentiment,
         )
         query_result = query_bus.transport(query)
 
@@ -49,8 +49,6 @@ class NewsQuery(ObjectType):
 
     async def resolve_new(self, _, title: str) -> dict:
         query_bus = container_builder.get("bus_station.query_terminal.bus.synchronous.sync_query_bus.SyncQueryBus")
-        query = GetNewQuery(
-            title=title
-        )
+        query = GetNewQuery(title=title)
         query_result = query_bus.transport(query)
         return asdict(query_result.data)

@@ -29,9 +29,15 @@ def load(*_) -> Application:
     graphql_scheme = container_builder.get("graphene.Schema")
     setup_graphql_routes(app, graphql_scheme)
 
-    app.middlewares.append(container_builder.get("infrastructure.api.middlewares.error_middleware.ErrorMiddleware").middleware)
-    app.middlewares.append(container_builder.get("infrastructure.api.middlewares.apm_middleware.APMMiddleware").middleware)
-    app.middlewares.append(container_builder.get("infrastructure.api.middlewares.log_middleware.LogMiddleware").middleware)
+    app.middlewares.append(
+        container_builder.get("infrastructure.api.middlewares.error_middleware.ErrorMiddleware").middleware
+    )
+    app.middlewares.append(
+        container_builder.get("infrastructure.api.middlewares.apm_middleware.APMMiddleware").middleware
+    )
+    app.middlewares.append(
+        container_builder.get("infrastructure.api.middlewares.log_middleware.LogMiddleware").middleware
+    )
 
     setup_aiohttp_apispec(
         app=app,

@@ -16,8 +16,6 @@ def load() -> None:
         Definition(
             "infrastructure.health_checker.HealthChecker",
             "infrastructure.health_checker.HealthChecker",
-            [
-                Argument.no_kw_argument("@pymongo.MongoClient")
-            ]
+            [Argument.no_kw_argument("@pymongo.MongoClient")],
         )
     )

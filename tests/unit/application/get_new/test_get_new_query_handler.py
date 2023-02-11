@@ -15,11 +15,8 @@ class TestGetNewQueryHandler(TestCase):
     def setUp(self) -> None:
         self.new_repository_mock = Mock(spec=NewRepository)
         self.logger_mock = Mock(spec=Logger)
-        self.query_handler = GetNewQueryHandler(
-            self.new_repository_mock,
-            self.logger_mock
-        )
-    
+        self.query_handler = GetNewQueryHandler(self.new_repository_mock, self.logger_mock)
+
     def test_handle_success(self):
         test_new = New(
             title="test_title",
@@ -28,12 +25,10 @@ class TestGetNewQueryHandler(TestCase):
             source="test_source",
             date=2341231.23,
             language="test_language",
-            hydrated=True
+            hydrated=True,
         )
         self.new_repository_mock.find_by_title.return_value = test_new
-        test_query = GetNewQuery(
-            title="test_title"
-        )
+        test_query = GetNewQuery(title="test_title")
 
         query_response = self.query_handler.handle(test_query)
 
@@ -42,9 +37,7 @@ class TestGetNewQueryHandler(TestCase):
 
     def test_handle_not_found(self):
         self.new_repository_mock.find_by_title.return_value = None
-        test_query = GetNewQuery(
-            title="test_title"
-        )
+        test_query = GetNewQuery(title="test_title")
 
         with self.assertRaises(NewNotFoundException) as context:
             self.query_handler.handle(test_query)

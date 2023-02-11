@@ -8,8 +8,6 @@ def load() -> None:
         Definition(
             "infrastructure.mongo.mongo_new_repository.MongoNewRepository",
             "infrastructure.mongo.mongo_new_repository.MongoNewRepository",
-            [
-                Argument.no_kw_argument("@pymongo.database.Database")
-            ]
+            [Argument.no_kw_argument("@pymongo.database.Database")],
         )
     )

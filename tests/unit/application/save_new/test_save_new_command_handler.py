@@ -17,11 +17,7 @@ class TestSaveNewCommandHandler(TestCase):
         self.new_repository_mock = Mock(spec=NewRepository)
         self.event_bus_mock = Mock(spec=EventBus)
         self.logger_mock = Mock(spec=Logger)
-        self.command_handler = SaveNewCommandHandler(
-            self.new_repository_mock,
-            self.event_bus_mock,
-            self.logger_mock
-        )
+        self.command_handler = SaveNewCommandHandler(self.new_repository_mock, self.event_bus_mock, self.logger_mock)
 
     def test_handle_success(self):
         test_command = SaveNewCommand(
@@ -35,7 +31,7 @@ class TestSaveNewCommandHandler(TestCase):
             entities=[NamedEntity(text="test_named_entity", type="test_named_entity_type")],
             summary="test_new_summary",
             sentiment=1.23,
-            image="test_image"
+            image="test_image",
         )
 
         self.command_handler.handle(test_command)
@@ -52,7 +48,7 @@ class TestSaveNewCommandHandler(TestCase):
                 entities=[NamedEntity(text="test_named_entity", type="test_named_entity_type")],
                 summary="test_new_summary",
                 sentiment=1.23,
-                image="test_image"
+                image="test_image",
             )
         )
         self.event_bus_mock.transport.assert_called_once_with(
@@ -67,6 +63,6 @@ class TestSaveNewCommandHandler(TestCase):
                 entities=[NamedEntity(text="test_named_entity", type="test_named_entity_type")],
                 summary="test_new_summary",
                 sentiment=1.23,
-                image="test_image"
+                image="test_image",
             )
         )
