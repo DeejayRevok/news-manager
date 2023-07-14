@@ -12,4 +12,3 @@ def load():
         discovery_base_path=sources_path,
         sources_root_path=sources_path,
     ).load()
-
