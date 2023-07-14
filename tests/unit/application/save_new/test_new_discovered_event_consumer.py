@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from bus_station.command_terminal.bus.command_bus import CommandBus
 
@@ -16,7 +16,8 @@ class TestNewDiscoveredEventConsumer(TestCase):
         self.command_bus_mock = Mock(spec=CommandBus)
         self.event_consumer = NewDiscoveredEventConsumer(self.new_repository_mock, self.command_bus_mock)
 
-    def test_consume_existing_new(self):
+    @patch("bus_station.passengers.passenger.uuid4")
+    def test_consume_existing_new(self, *_):
         test_new = New(
             title="test_title",
             url="test_url",
@@ -42,7 +43,8 @@ class TestNewDiscoveredEventConsumer(TestCase):
         self.new_repository_mock.find_by_title.assert_called_once_with("test_new")
         self.command_bus_mock.transport.assert_not_called()
 
-    def test_consume_non_existing_new(self):
+    @patch("bus_station.passengers.passenger.uuid4")
+    def test_consume_non_existing_new(self, *_):
         test_event = NewDiscoveredEvent(
             title="test_new",
             url="test_url",
