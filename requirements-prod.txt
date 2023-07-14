@@ -13,7 +13,7 @@ psutil==5.7.0
 bs4==0.0.1
 lxml==4.9.1
 elastic-apm==6.0.0
-pypendency==0.1.0
 dacite==1.6.0
-bus-station==4.0.0
+bus-station==7.0.0
 python-json-logger==2.0.4
+yandil==0.3.3

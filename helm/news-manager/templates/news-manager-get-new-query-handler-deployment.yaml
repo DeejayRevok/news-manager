@@ -28,7 +28,7 @@ spec:
         command:
           - make
           - run_rpyc_query_engine
-          - QUERY_NAME=query.news_manager.get_new
+          - QUERY_HANDLER_NAME=query_handler.news_manager.get_new
       restartPolicy: Always
       serviceAccountName: ""
 status: {}

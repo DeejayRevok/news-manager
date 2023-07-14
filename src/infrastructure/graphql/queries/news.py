@@ -2,8 +2,9 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import List
 
+from bus_station.query_terminal.bus.synchronous.sync_query_bus import SyncQueryBus
 from graphene import ObjectType, List as GraphList, Field, Argument, String, Boolean, Float
-from pypendency.builder import container_builder
+from yandil.container import default_container
 
 from application.get_new.get_new_query import GetNewQuery
 from application.get_news.get_news_query import GetNewsQuery
@@ -34,7 +35,7 @@ class NewsQuery(ObjectType):
         from_date: datetime = None,
         to_date: datetime = None,
     ) -> List[dict]:
-        query_bus = container_builder.get("bus_station.query_terminal.bus.synchronous.sync_query_bus.SyncQueryBus")
+        query_bus = default_container[SyncQueryBus]
         query = GetNewsQuery(
             source=source,
             hydrated=hydration,
@@ -48,7 +49,7 @@ class NewsQuery(ObjectType):
         return [asdict(new) for new in query_result.data]
 
     async def resolve_new(self, _, title: str) -> dict:
-        query_bus = container_builder.get("bus_station.query_terminal.bus.synchronous.sync_query_bus.SyncQueryBus")
+        query_bus = default_container[SyncQueryBus]
         query = GetNewQuery(title=title)
         query_result = query_bus.transport(query)
         return asdict(query_result.data)

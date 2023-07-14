@@ -1,7 +1,8 @@
 import os
 
 from pymongo import MongoClient
-from pypendency.builder import container_builder
+from pymongo.database import Database
+from yandil.container import default_container
 
 
 def load() -> None:
@@ -13,5 +14,5 @@ def load() -> None:
         port=mongo_port,
     )
     mongo_db = mongo_client[mongo_database]
-    container_builder.set("pymongo.MongoClient", mongo_client)
-    container_builder.set("pymongo.database.Database", mongo_db)
+    default_container[MongoClient] = mongo_client
+    default_container[Database] = mongo_db

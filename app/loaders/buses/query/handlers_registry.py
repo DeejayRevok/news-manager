@@ -1,32 +1,20 @@
-import os
+from os import environ
 
-from bus_station.query_terminal.registry.redis_query_registry import RedisQueryRegistry
-from pypendency.builder import container_builder
+from bus_station.bus_stop.registration.address.redis_bus_stop_address_registry import RedisBusStopAddressRegistry
+from bus_station.query_terminal.query_handler_registry import QueryHandlerRegistry
+from yandil.container import default_container
+
+from application.get_new.get_new_query_handler import GetNewQueryHandler
+from application.get_news.get_news_query_handler import GetNewsQueryHandler
 
 
 def register() -> None:
-    in_memory_registry = container_builder.get(
-        "bus_station.query_terminal.registry.in_memory_query_registry.InMemoryQueryRegistry"
-    )
-    get_news_query_handler = container_builder.get("application.get_news.get_news_query_handler.GetNewsQueryHandler")
-    get_new_query_handler = container_builder.get("application.get_new.get_new_query_handler.GetNewQueryHandler")
-    in_memory_registry.register(get_news_query_handler, get_news_query_handler)
-    in_memory_registry.register(get_new_query_handler, get_new_query_handler)
+    registry = default_container[QueryHandlerRegistry]
+    registry.register(default_container[GetNewsQueryHandler])
+    registry.register(default_container[GetNewQueryHandler])
 
-    redis_registry = container_builder.get(
-        "bus_station.query_terminal.registry.redis_query_registry.RedisQueryRegistry",
-    )
+    address_registry = default_container[RedisBusStopAddressRegistry]
 
-    __register_rpyc_query_handler(
-        registry=redis_registry,
-        query_handler_fqn="application.get_new.get_new_query_handler.GetNewQueryHandler",
-        query_handler_host=os.environ.get("NEWS_MANAGER_RPYC_GET_NEW_HOST"),
-        query_handler_port=int(os.environ.get("NEWS_MANAGER_RPYC_GET_NEW_PORT")),
-    )
-
-
-def __register_rpyc_query_handler(
-    registry: RedisQueryRegistry, query_handler_fqn: str, query_handler_host: str, query_handler_port: int
-) -> None:
-    handler = container_builder.get(query_handler_fqn)
-    registry.register(handler, f"{query_handler_host}:{query_handler_port}")
+    get_new_host = environ.get("NEWS_MANAGER_RPYC_GET_NEW_HOST")
+    get_new_port = int(environ.get("NEWS_MANAGER_RPYC_GET_NEW_PORT"))
+    address_registry.register(GetNewQueryHandler, f"{get_new_host}:{get_new_port}")
