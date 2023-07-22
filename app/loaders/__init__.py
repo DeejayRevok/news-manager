@@ -1,3 +1,4 @@
+from app.loaders.configuration_loader import load as load_configuration
 from app.loaders.container_loader import load as load_container
 from app.loaders.mongo_loader import load as load_mongo
 from app.loaders.logger_loader import load as load_logger
@@ -14,6 +15,7 @@ from app.loaders.buses.query.middlewares_loader import load as load_query_bus_mi
 
 
 def load_app():
+    load_configuration()
     load_logger()
     load_mongo()
     load_redis()
